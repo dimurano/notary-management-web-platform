@@ -1,0 +1,50 @@
+steps:
+  # Step 1: Build Docker image and tag with commit SHA and latest
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+
+  # Step 2: Push image with commit SHA tag to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-sha
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+
+  # Step 3: Push latest tag
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-latest
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+
+  # Step 4: (Optional) Deploy to Cloud Run
+  # Uncomment and configure if you want automatic deployment
+  # - name: 'gcr.io/cloud-builders/run'
+  #   args:
+  #     - 'deploy'
+  #     - 'notary-api'
+  #     - '--image'
+  #     - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+  #     - '--region'
+  #     - 'us-central1'
+  #     - '--platform'
+  #     - 'managed'
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '3600s'
