@@ -1,0 +1,196 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs40 \cf0 \expnd0\expndtw0\kerning0
+html\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs28 \cf0 <!DOCTYPE html>\
+<html lang="en">\
+<head>\
+    <meta charset="UTF-8">\
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+    <title>NotaryFlow - Digital Journal & Manager</title>\
+    <!-- Tailwind CSS CDN -->\
+    <script src="https://tailwindcss.com"></script>\
+</head>\
+<body class="bg-gray-50 font-sans text-gray-900 flex h-screen overflow-hidden">\
+\
+    <!-- Sidebar Navigation -->\
+    <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between shrink-0">\
+        <div class="p-5">\
+            <h1 class="text-xl font-bold tracking-wider text-indigo-400 mb-8">\uc0\u10002 \u65039  NotaryFlow</h1>\
+            <nav class="space-y-2">\
+                <button onclick="switchView('dashboard')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg bg-indigo-600 font-medium transition-colors">\
+                    \uc0\u55357 \u56522  Journal Dashboard\
+                </button>\
+                <button onclick="switchView('clients')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors">\
+                    \uc0\u55357 \u56421  Client Manager\
+                </button>\
+                <button onclick="switchView('new-session')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors">\
+                    \uc0\u10133  New Session\
+                </button>\
+            </nav>\
+        </div>\
+        <div class="p-5 border-t border-slate-800 text-xs text-slate-400">\
+            Commission #123456<br>Expires: 12/31/2028\
+        </div>\
+    </aside>\
+\
+    <!-- Main Content Window -->\
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8">\
+        \
+        <!-- VIEW 1: JOURNAL DASHBOARD -->\
+        <section id="view-dashboard" class="view-panel space-y-6">\
+            <header class="flex justify-between items-center">\
+                <div>\
+                    <h2 class="text-2xl font-bold text-slate-800">Notarial Journal</h2>\
+                    <p class="text-sm text-slate-500">Your chronologically bound legal logbook.</p>\
+                </div>\
+            </header>\
+            \
+            <!-- Metrics Bar -->\
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">\
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Acts (MTD)</span>\
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1">42</h3>\
+                </div>\
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fees Collected</span>\
+                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">$630.00</h3>\
+                </div>\
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pending Signatures</span>\
+                    <h3 class="text-2xl font-bold text-amber-500 mt-1">3</h3>\
+                </div>\
+            </div>\
+\
+            <!-- Ledger Table -->\
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">\
+                <table class="w-full text-left border-collapse">\
+                    <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">\
+                        <tr>\
+                            <th class="p-4">Date/Time</th>\
+                            <th class="p-4">Signer(s)</th>\
+                            <th class="p-4">Type of Act</th>\
+                            <th class="p-4">Fee Charged</th>\
+                            <th class="p-4">Status</th>\
+                        </tr>\
+                    </thead>\
+                    <tbody class="divide-y divide-gray-100 text-sm" id="journal-table-body">\
+                        <!-- Simulated Rows or API Rendered Rows -->\
+                        <tr class="hover:bg-gray-50/70">\
+                            <td class="p-4 font-medium text-slate-700">Oct 24, 2026 14:15</td>\
+                            <td class="p-4 text-slate-600">Jane Doe</td>\
+                            <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md">Acknowledgment</span></td>\
+                            <td class="p-4 text-slate-600">$15.00</td>\
+                            <td class="p-4"><span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-md">Paid</span></td>\
+                        </tr>\
+                    </tbody>\
+                </table>\
+            </div>\
+        </section>\
+\
+        <!-- VIEW 2: CLIENT MANAGER -->\
+        <section id="view-clients" class="view-panel hidden space-y-6">\
+            <div>\
+                <h2 class="text-2xl font-bold text-slate-800">Client Directory</h2>\
+                <p class="text-sm text-slate-500">Manage demographic and identification statuses.</p>\
+            </div>\
+            \
+            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-xl">\
+                <h3 class="text-md font-semibold text-slate-700 mb-4">Quick Add Client</h3>\
+                <form id="clientForm" class="space-y-4">\
+                    <div class="grid grid-cols-2 gap-4">\
+                        <div>\
+                            <label class="block text-xs font-medium text-gray-500 mb-1">First Name</label>\
+                            <input type="text" id="firstName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
+                        </div>\
+                        <div>\
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Last Name</label>\
+                            <input type="text" id="lastName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
+                        </div>\
+                    </div>\
+                    <div>\
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>\
+                        <input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
+                    </div>\
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-medium text-sm py-2.5 rounded-lg hover:bg-indigo-700 transition-colors">\
+                        Add to Database\
+                    </button>\
+                </form>\
+            </div>\
+        </section>\
+\
+        <!-- VIEW 3: NEW SESSION WORKFLOW -->\
+        <section id="view-new-session" class="view-panel hidden space-y-6">\
+            <div>\
+                <h2 class="text-2xl font-bold text-slate-800">Log New Notarial Act</h2>\
+                <p class="text-sm text-slate-500">Enter metadata required by state ledger statutes.</p>\
+            </div>\
+            \
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">\
+                <!-- Session Form Entry Details -->\
+                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">\
+                    <div>\
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Notarial Act Type</label>\
+                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
+                            <option>Acknowledgment</option>\
+                            <option>Jurat</option>\
+                            <option>Oath/Affirmation</option>\
+                        </select>\
+                    </div>\
+                    \
+                    <!-- ID Verification Module -->\
+                    <div class="border-t border-gray-100 pt-4">\
+                        <h4 class="text-sm font-semibold text-slate-700 mb-2">Identity Verification</h4>\
+                        <div class="grid grid-cols-2 gap-4">\
+                            <div>\
+                                <label class="block text-xs font-medium text-gray-500 mb-1">ID Document Type</label>\
+                                <select id="idType" onchange="toggleIdRules()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none">\
+                                    <option value="Drivers License">Driver's License</option>\
+                                    <option value="Passport">Passport</option>\
+                                    <option value="Credible Witness">Credible Witness</option>\
+                                </select>\
+                            </div>\
+                            <div>\
+                                <label class="block text-xs font-medium text-gray-500 mb-1">ID Expiration Date</label>\
+                                <input type="date" id="idExpiry" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none">\
+                            </div>\
+                        </div>\
+                        <div id="compliance-alert" class="mt-3 hidden p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium"></div>\
+                    </div>\
+\
+                    <!-- File Submission -->\
+                    <div class="border-t border-gray-100 pt-4">\
+                        <h4 class="text-sm font-semibold text-slate-700 mb-1">Document Storage Link</h4>\
+                        <label class="block text-xs text-gray-400 mb-2">Upload document copy for validation previewing.</label>\
+                        <input type="file" id="docFile" onchange="handleF\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs32 \cf0 No document uploaded for preview\
+\
+\
+\
+\
+function switchView(viewId) \{\
+// Hide all layout containers\
+document.querySelectorAll('.view-panel').forEach(view => view.classList.add('hidden'));\
+// Un-hide targeted view\
+document.getElementById('view-' + viewId).classList.remove('hidden');\
+// Toggle highlight styles on active navigation menu buttons\
+document.querySelectorAll('.nav-btn').forEach(btn => \{\
+btn.classList.remove('bg-indigo-600', 'text-white');\
+btn.classList.add('hover:bg-slate-800', 'text-slate-300');\
+\});\
+event.currentTarget.classList.add('bg-indigo-600', 'text-white');\
+event.currentTarget.classList.remove('hover:bg-slate-800', 'text-slate-300');\
+\}\
+}
