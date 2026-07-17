@@ -15,6 +15,15 @@ from sqlalchemy import create_engine\
 from sqlalchemy.orm import sessionmaker\
 import models\
 \
+# uwsgi: pip install pyuwsgi
+uwsgi --http :$PORT -s /tmp/app.sock --manage-script-name --mount /app=main:app
+
+# uvicorn: pip install uvicorn
+uvicorn --port $PORT --host 0.0.0.0 main:app
+
+# waitress: pip install waitress
+waitress-serve --port $PORT main:app
+\
 # Database setup (SQLite for easy development, switch to PostgreSQL URL later)\
 SQLALCHEMY_DATABASE_URL = "sqlite:///./notary_journal.db"\
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=\{"check_same_thread": False\})\
