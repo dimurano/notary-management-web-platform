@@ -1,196 +1,230 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2870
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 ArialMT;\f1\fmodern\fcharset0 Courier;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\deftab720
-\pard\pardeftab720\partightenfactor0
-
-\f0\fs40 \cf0 \expnd0\expndtw0\kerning0
-html\
-\pard\pardeftab720\partightenfactor0
-
-\f1\fs28 \cf0 <!DOCTYPE html>\
-<html lang="en">\
-<head>\
-    <meta charset="UTF-8">\
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-    <title>NotaryFlow - Digital Journal & Manager</title>\
-    <!-- Tailwind CSS CDN -->\
-    <script src="https://tailwindcss.com"></script>\
-</head>\
-<body class="bg-gray-50 font-sans text-gray-900 flex h-screen overflow-hidden">\
-\
-    <!-- Sidebar Navigation -->\
-    <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between shrink-0">\
-        <div class="p-5">\
-            <h1 class="text-xl font-bold tracking-wider text-indigo-400 mb-8">\uc0\u10002 \u65039  NotaryFlow</h1>\
-            <nav class="space-y-2">\
-                <button onclick="switchView('dashboard')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg bg-indigo-600 font-medium transition-colors">\
-                    \uc0\u55357 \u56522  Journal Dashboard\
-                </button>\
-                <button onclick="switchView('clients')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors">\
-                    \uc0\u55357 \u56421  Client Manager\
-                </button>\
-                <button onclick="switchView('new-session')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors">\
-                    \uc0\u10133  New Session\
-                </button>\
-            </nav>\
-        </div>\
-        <div class="p-5 border-t border-slate-800 text-xs text-slate-400">\
-            Commission #123456<br>Expires: 12/31/2028\
-        </div>\
-    </aside>\
-\
-    <!-- Main Content Window -->\
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8">\
-        \
-        <!-- VIEW 1: JOURNAL DASHBOARD -->\
-        <section id="view-dashboard" class="view-panel space-y-6">\
-            <header class="flex justify-between items-center">\
-                <div>\
-                    <h2 class="text-2xl font-bold text-slate-800">Notarial Journal</h2>\
-                    <p class="text-sm text-slate-500">Your chronologically bound legal logbook.</p>\
-                </div>\
-            </header>\
-            \
-            <!-- Metrics Bar -->\
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">\
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Total Acts (MTD)</span>\
-                    <h3 class="text-2xl font-bold text-slate-800 mt-1">42</h3>\
-                </div>\
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Fees Collected</span>\
-                    <h3 class="text-2xl font-bold text-emerald-600 mt-1">$630.00</h3>\
-                </div>\
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">\
-                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pending Signatures</span>\
-                    <h3 class="text-2xl font-bold text-amber-500 mt-1">3</h3>\
-                </div>\
-            </div>\
-\
-            <!-- Ledger Table -->\
-            <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">\
-                <table class="w-full text-left border-collapse">\
-                    <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase">\
-                        <tr>\
-                            <th class="p-4">Date/Time</th>\
-                            <th class="p-4">Signer(s)</th>\
-                            <th class="p-4">Type of Act</th>\
-                            <th class="p-4">Fee Charged</th>\
-                            <th class="p-4">Status</th>\
-                        </tr>\
-                    </thead>\
-                    <tbody class="divide-y divide-gray-100 text-sm" id="journal-table-body">\
-                        <!-- Simulated Rows or API Rendered Rows -->\
-                        <tr class="hover:bg-gray-50/70">\
-                            <td class="p-4 font-medium text-slate-700">Oct 24, 2026 14:15</td>\
-                            <td class="p-4 text-slate-600">Jane Doe</td>\
-                            <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md">Acknowledgment</span></td>\
-                            <td class="p-4 text-slate-600">$15.00</td>\
-                            <td class="p-4"><span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-md">Paid</span></td>\
-                        </tr>\
-                    </tbody>\
-                </table>\
-            </div>\
-        </section>\
-\
-        <!-- VIEW 2: CLIENT MANAGER -->\
-        <section id="view-clients" class="view-panel hidden space-y-6">\
-            <div>\
-                <h2 class="text-2xl font-bold text-slate-800">Client Directory</h2>\
-                <p class="text-sm text-slate-500">Manage demographic and identification statuses.</p>\
-            </div>\
-            \
-            <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-xl">\
-                <h3 class="text-md font-semibold text-slate-700 mb-4">Quick Add Client</h3>\
-                <form id="clientForm" class="space-y-4">\
-                    <div class="grid grid-cols-2 gap-4">\
-                        <div>\
-                            <label class="block text-xs font-medium text-gray-500 mb-1">First Name</label>\
-                            <input type="text" id="firstName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
-                        </div>\
-                        <div>\
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Last Name</label>\
-                            <input type="text" id="lastName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
-                        </div>\
-                    </div>\
-                    <div>\
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Email</label>\
-                        <input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
-                    </div>\
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-medium text-sm py-2.5 rounded-lg hover:bg-indigo-700 transition-colors">\
-                        Add to Database\
-                    </button>\
-                </form>\
-            </div>\
-        </section>\
-\
-        <!-- VIEW 3: NEW SESSION WORKFLOW -->\
-        <section id="view-new-session" class="view-panel hidden space-y-6">\
-            <div>\
-                <h2 class="text-2xl font-bold text-slate-800">Log New Notarial Act</h2>\
-                <p class="text-sm text-slate-500">Enter metadata required by state ledger statutes.</p>\
-            </div>\
-            \
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">\
-                <!-- Session Form Entry Details -->\
-                <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">\
-                    <div>\
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Notarial Act Type</label>\
-                        <select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">\
-                            <option>Acknowledgment</option>\
-                            <option>Jurat</option>\
-                            <option>Oath/Affirmation</option>\
-                        </select>\
-                    </div>\
-                    \
-                    <!-- ID Verification Module -->\
-                    <div class="border-t border-gray-100 pt-4">\
-                        <h4 class="text-sm font-semibold text-slate-700 mb-2">Identity Verification</h4>\
-                        <div class="grid grid-cols-2 gap-4">\
-                            <div>\
-                                <label class="block text-xs font-medium text-gray-500 mb-1">ID Document Type</label>\
-                                <select id="idType" onchange="toggleIdRules()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none">\
-                                    <option value="Drivers License">Driver's License</option>\
-                                    <option value="Passport">Passport</option>\
-                                    <option value="Credible Witness">Credible Witness</option>\
-                                </select>\
-                            </div>\
-                            <div>\
-                                <label class="block text-xs font-medium text-gray-500 mb-1">ID Expiration Date</label>\
-                                <input type="date" id="idExpiry" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none">\
-                            </div>\
-                        </div>\
-                        <div id="compliance-alert" class="mt-3 hidden p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium"></div>\
-                    </div>\
-\
-                    <!-- File Submission -->\
-                    <div class="border-t border-gray-100 pt-4">\
-                        <h4 class="text-sm font-semibold text-slate-700 mb-1">Document Storage Link</h4>\
-                        <label class="block text-xs text-gray-400 mb-2">Upload document copy for validation previewing.</label>\
-                        <input type="file" id="docFile" onchange="handleF\
-\
-\
-\pard\pardeftab720\partightenfactor0
-
-\f0\fs32 \cf0 No document uploaded for preview\
-\
-\
-\
-\
-function switchView(viewId) \{\
-// Hide all layout containers\
-document.querySelectorAll('.view-panel').forEach(view => view.classList.add('hidden'));\
-// Un-hide targeted view\
-document.getElementById('view-' + viewId).classList.remove('hidden');\
-// Toggle highlight styles on active navigation menu buttons\
-document.querySelectorAll('.nav-btn').forEach(btn => \{\
-btn.classList.remove('bg-indigo-600', 'text-white');\
-btn.classList.add('hover:bg-slate-800', 'text-slate-300');\
-\});\
-event.currentTarget.classList.add('bg-indigo-600', 'text-white');\
-event.currentTarget.classList.remove('hover:bg-slate-800', 'text-slate-300');\
-\}\
-}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Courier}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Courier; min-height: 17.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Arial}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Arial; min-height: 18.0px}
+    span.s1 {font-kerning: none}
+    span.s2 {font: 14.0px 'Apple Color Emoji'; font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;NotaryFlow - Digital Journal &amp; Manager&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Tailwind CSS CDN --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://tailwindcss.com"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body class="bg-gray-50 font-sans text-gray-900 flex h-screen overflow-hidden"&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Sidebar Navigation --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;aside class="w-64 bg-slate-900 text-white flex flex-col justify-between shrink-0"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="p-5"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h1 class="text-xl font-bold tracking-wider text-indigo-400 mb-8"&gt;</span><span class="s2">✒️</span><span class="s1"> NotaryFlow&lt;/h1&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;nav class="space-y-2"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="switchView('dashboard')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg bg-indigo-600 font-medium transition-colors"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span></span><span class="s2">📊</span><span class="s1"> Journal Dashboard</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="switchView('clients')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span></span><span class="s2">👥</span><span class="s1"> Client Manager</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;button onclick="switchView('new-session')" class="nav-btn w-full text-left px-4 py-2.5 rounded-lg hover:bg-slate-800 font-medium text-slate-300 transition-colors"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span></span><span class="s2">➕</span><span class="s1"> New Session</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/nav&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="p-5 border-t border-slate-800 text-xs text-slate-400"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>Commission #123456&lt;br&gt;Expires: 12/31/2028</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/aside&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- Main Content Window --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;main class="flex-1 flex flex-col min-w-0 overflow-y-auto p-8"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- VIEW 1: JOURNAL DASHBOARD --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section id="view-dashboard" class="view-panel space-y-6"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;header class="flex justify-between items-center"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h2 class="text-2xl font-bold text-slate-800"&gt;Notarial Journal&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;p class="text-sm text-slate-500"&gt;Your chronologically bound legal logbook.&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/header&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;!-- Metrics Bar --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-1 md:grid-cols-3 gap-5"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-xs font-semibold text-gray-400 uppercase tracking-wider"&gt;Total Acts (MTD)&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3 class="text-2xl font-bold text-slate-800 mt-1"&gt;42&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-xs font-semibold text-gray-400 uppercase tracking-wider"&gt;Fees Collected&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3 class="text-2xl font-bold text-emerald-600 mt-1"&gt;$630.00&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;span class="text-xs font-semibold text-gray-400 uppercase tracking-wider"&gt;Pending Signatures&lt;/span&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;h3 class="text-2xl font-bold text-amber-500 mt-1"&gt;3&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;!-- Ledger Table --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;table class="w-full text-left border-collapse"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;tr&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;th class="p-4"&gt;Date/Time&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;th class="p-4"&gt;Signer(s)&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;th class="p-4"&gt;Type of Act&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;th class="p-4"&gt;Fee Charged&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;th class="p-4"&gt;Status&lt;/th&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/tr&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/thead&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;tbody class="divide-y divide-gray-100 text-sm" id="journal-table-body"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;!-- Simulated Rows or API Rendered Rows --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;tr class="hover:bg-gray-50/70"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;td class="p-4 font-medium text-slate-700"&gt;Oct 24, 2026 14:15&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;td class="p-4 text-slate-600"&gt;Jane Doe&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;td class="p-4"&gt;&lt;span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-md"&gt;Acknowledgment&lt;/span&gt;&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;td class="p-4 text-slate-600"&gt;$15.00&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;td class="p-4"&gt;&lt;span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-md"&gt;Paid&lt;/span&gt;&lt;/td&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/tr&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/tbody&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/table&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- VIEW 2: CLIENT MANAGER --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section id="view-clients" class="view-panel hidden space-y-6"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold text-slate-800"&gt;Client Directory&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-sm text-slate-500"&gt;Manage demographic and identification statuses.&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm max-w-xl"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h3 class="text-md font-semibold text-slate-700 mb-4"&gt;Quick Add Client&lt;/h3&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;form id="clientForm" class="space-y-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="grid grid-cols-2 gap-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;First Name&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;input type="text" id="firstName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;Last Name&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;input type="text" id="lastName" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;Email&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;input type="email" id="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;button type="submit" class="w-full bg-indigo-600 text-white font-medium text-sm py-2.5 rounded-lg hover:bg-indigo-700 transition-colors"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>Add to Database</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/button&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;/form&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/section&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- VIEW 3: NEW SESSION WORKFLOW --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;section id="view-new-session" class="view-panel hidden space-y-6"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;h2 class="text-2xl font-bold text-slate-800"&gt;Log New Notarial Act&lt;/h2&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;p class="text-sm text-slate-500"&gt;Enter metadata required by state ledger statutes.&lt;/p&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div class="grid grid-cols-1 lg:grid-cols-2 gap-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;!-- Session Form Entry Details --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>&lt;div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;Notarial Act Type&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;select class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;option&gt;Acknowledgment&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;option&gt;Jurat&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;option&gt;Oath/Affirmation&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;!-- ID Verification Module --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="border-t border-gray-100 pt-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h4 class="text-sm font-semibold text-slate-700 mb-2"&gt;Identity Verification&lt;/h4&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div class="grid grid-cols-2 gap-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;ID Document Type&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;select id="idType" onchange="toggleIdRules()" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;option value="Drivers License"&gt;Driver's License&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;option value="Passport"&gt;Passport&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;option value="Credible Witness"&gt;Credible Witness&lt;/option&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/select&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label class="block text-xs font-medium text-gray-500 mb-1"&gt;ID Expiration Date&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input type="date" id="idExpiry" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div id="compliance-alert" class="mt-3 hidden p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-xs font-medium"&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;!-- File Submission --&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div class="border-t border-gray-100 pt-4"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;h4 class="text-sm font-semibold text-slate-700 mb-1"&gt;Document Storage Link&lt;/h4&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;label class="block text-xs text-gray-400 mb-2"&gt;Upload document copy for validation previewing.&lt;/label&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;input type="file" id="docFile" onchange="handleF</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1">No document uploaded for preview</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1">function switchView(viewId) {</span></p>
+<p class="p3"><span class="s1">// Hide all layout containers</span></p>
+<p class="p3"><span class="s1">document.querySelectorAll('.view-panel').forEach(view =&gt; view.classList.add('hidden'));</span></p>
+<p class="p3"><span class="s1">// Un-hide targeted view</span></p>
+<p class="p3"><span class="s1">document.getElementById('view-' + viewId).classList.remove('hidden');</span></p>
+<p class="p3"><span class="s1">// Toggle highlight styles on active navigation menu buttons</span></p>
+<p class="p3"><span class="s1">document.querySelectorAll('.nav-btn').forEach(btn =&gt; {</span></p>
+<p class="p3"><span class="s1">btn.classList.remove('bg-indigo-600', 'text-white');</span></p>
+<p class="p3"><span class="s1">btn.classList.add('hover:bg-slate-800', 'text-slate-300');</span></p>
+<p class="p3"><span class="s1">});</span></p>
+<p class="p3"><span class="s1">event.currentTarget.classList.add('bg-indigo-600', 'text-white');</span></p>
+<p class="p3"><span class="s1">event.currentTarget.classList.remove('hover:bg-slate-800', 'text-slate-300');</span></p>
+<p class="p3"><span class="s1">}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">```javascript</span></p>
+<p class="p1"><span class="s1">function toggleIdRules() {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const idType = document.getElementById('idType').value;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const expiryInput = document.getElementById('idExpiry');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const alertBox = document.getElementById('compliance-alert');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Clear out active warnings</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>alertBox.classList.add('hidden');</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (idType === 'Credible Witness') {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>alertBox.textContent = "</span><span class="s2">⚖️</span><span class="s1"> Statutory Check: Credible witnesses must be personally known to the notary or present their own valid credentials under separate entries.";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>alertBox.classList.remove('hidden');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (expiryInput.value) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const expiryDate = new Date(expiryInput.value);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const today = new Date();</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (expiryDate &lt;= today) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>alertBox.textContent = "</span><span class="s2">🚨</span><span class="s1"> Non-Compliant: Stored Identification is expired. State regulations prohibit proceeding with expired identification documents.";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>alertBox.classList.remove('hidden');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p1"><span class="s1">}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">// Track input dates for state validation triggers</span></p>
+<p class="p1"><span class="s1">document.getElementById('idExpiry').addEventListener('change', toggleIdRules);</span></p>
+</body>
+</html>

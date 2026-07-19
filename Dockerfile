@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.11-slim AS builder
+FROM python:3.14-slim
 
 WORKDIR /build
 COPY requirements.txt .
@@ -30,8 +30,9 @@ COPY --from=builder /opt/venv /opt/venv
 # Copy application code
 COPY --chown=appuser:appuser . .
 
-# Create data directory with proper permissions
-RUN mkdir -p /app/data && chown appuser:appuser /app/data
+# Create writable directories for data and temp
+RUN mkdir -p /app/data /tmp && \
+    chown -R appuser:appuser /app/data /tmp
 
 # Switch to non-root user
 USER appuser
@@ -39,9 +40,8 @@ USER appuser
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:${PORT}/api/health', timeout=5)" || exit 1
+# Use entrypoint script for startup
+COPY --chown=appuser:appuser entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Run the FastAPI server
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]
+ENTRYPOINT ["/app/entrypoint.sh"]
