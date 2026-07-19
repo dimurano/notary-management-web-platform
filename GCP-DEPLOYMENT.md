@@ -1,258 +1,149 @@
-# Notary API - Google Cloud Deployment Guide
+# Cloud Run Deployment - Fixed Configuration
 
-## Prerequisites
-- GCP account with active project `notary-management-web-platform`
-- `gcloud` CLI installed and authenticated: `gcloud auth login`
-- Docker installed locally
-- Project set: `gcloud config set project notary-management-web-platform`
+## Issue Resolved
+The previous deployment failed because:
+1. ✅ Database initialization was blocking app startup
+2. ✅ Health check timeout was too aggressive
+3. ✅ RTF file encoding issues (models.py was in RTF format)
 
-## Quick Setup (Automated)
-
-```bash
-# Make the setup script executable
-chmod +x gcp-setup.sh
-
-# Run the automated setup
-./gcp-setup.sh
-```
-
-This will:
-- Enable required GCP APIs
-- Create Artifact Registry repository
-- Configure Cloud Build service account
-- Guide you through GitHub integration
+All fixed in this version.
 
 ---
 
-## Manual Setup Steps
+## Deployment Steps
 
-### 1. Set Project Variables
+### Option 1: One-Command Deployment (Recommended)
 ```bash
+chmod +x deploy-cloud-run.sh
+./deploy-cloud-run.sh
+```
+
+### Option 2: Manual Deployment
+```bash
+# 1. Set variables
 export PROJECT_ID="notary-management-web-platform"
 export REGION="us-central1"
-export REPOSITORY="notary-repository"
-export IMAGE_NAME="notary-api"
-```
+export IMAGE_URL="us-central1-docker.pkg.dev/${PROJECT_ID}/notary-repository/notary-api:latest"
 
-### 2. Enable Required APIs
-```bash
-gcloud services enable \
-  artifactregistry.googleapis.com \
-  cloudbuild.googleapis.com \
-  run.googleapis.com \
-  container.googleapis.com
-```
+# 2. Push image (if not already pushed)
+docker push $IMAGE_URL
 
-### 3. Create Artifact Registry Repository
-```bash
-gcloud artifacts repositories create $REPOSITORY \
-  --repository-format=docker \
-  --location=$REGION \
-  --description="Docker repository for Notary API"
-```
-
-### 4. Configure Cloud Build Permissions
-```bash
-# Get project number
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
-CLOUD_BUILD_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
-
-# Grant IAM roles
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member=serviceAccount:$CLOUD_BUILD_SA \
-  --role=roles/artifactregistry.writer
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member=serviceAccount:$CLOUD_BUILD_SA \
-  --role=roles/run.admin
-```
-
-### 5. Build and Push Image Manually
-```bash
-# Build locally and push
-docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest .
-
-# Authenticate Docker
-gcloud auth configure-docker $REGION-docker.pkg.dev
-
-# Push
-docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest
-```
-
-Or use Cloud Build:
-```bash
-gcloud builds submit --config=cloudbuild.yaml
-```
-
-### 6. View Pushed Images
-```bash
-gcloud artifacts docker images list $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY
-```
-
----
-
-## Deployment Options
-
-### Option A: Cloud Run (Serverless - Recommended for Simple APIs)
-```bash
+# 3. Deploy to Cloud Run
 gcloud run deploy notary-api \
-  --image=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:latest \
+  --image=$IMAGE_URL \
   --region=$REGION \
   --platform=managed \
   --allow-unauthenticated \
-  --set-env-vars="DATABASE_URL=sqlite:///./data/notary_journal.db,ENVIRONMENT=production"
+  --port=8080 \
+  --cpu=1 \
+  --memory=512Mi \
+  --timeout=3600 \
+  --max-instances=20 \
+  --set-env-vars="ENVIRONMENT=production" \
+  --set-cloudsql-instances=notary-management-web-platform:us-central1:notary-db-instance
 ```
-
-### Option B: Google Kubernetes Engine (GKE - Recommended for Production)
-```bash
-# Create GKE cluster
-gcloud container clusters create notary-cluster \
-  --region=$REGION \
-  --num-nodes=2 \
-  --machine-type=e2-standard-2 \
-  --enable-autoscaling \
-  --min-nodes=1 \
-  --max-nodes=5
-
-# Get credentials
-gcloud container clusters get-credentials notary-cluster --region=$REGION
-
-# Deploy
-kubectl apply -f k8s/deployment.yaml
-
-# Check deployment
-kubectl get deployments -n notary-prod
-kubectl get pods -n notary-prod
-kubectl logs -n notary-prod -l app=notary-api -f
-```
-
-### Option C: Cloud Build GitHub Integration (CI/CD Pipeline)
-
-1. **Connect GitHub Repository**
-   - Go to Cloud Console > Cloud Build > Triggers
-   - Click "Connect Repository"
-   - Select GitHub and authorize
-   - Select your repository
-
-2. **Create Build Trigger**
-   - Click "Create Trigger"
-   - Name: `notary-api-main-build`
-   - Event: Push to branch (select `main`)
-   - Configuration: Cloud Build configuration file
-   - Location: `/ (root directory)` 
-   - File name: `cloudbuild.yaml`
-   - Click Create
-
-3. **Push to Main to Trigger Build**
-   ```bash
-   git add .
-   git commit -m "Setup CI/CD with Cloud Build"
-   git push origin main
-   ```
-
-4. **View Build Logs**
-   ```bash
-   # List builds
-   gcloud builds list
-
-   # View build details
-   gcloud builds log <BUILD_ID> --stream=true
-   ```
 
 ---
 
-## Environment Configuration
+## What Changed
 
-### For Development (SQLite)
-```bash
-export DATABASE_URL="sqlite:///./data/notary_journal.db"
-export ALLOWED_ORIGINS="http://localhost:3000,http://localhost:8000"
-```
+### main.py
+- ✅ Database connection no longer blocks startup
+- ✅ Tables created in startup event (non-blocking)
+- ✅ Health check returns immediately
+- ✅ 503 error if database unavailable (but app still starts)
+- ✅ Better error logging
 
-### For Production (Cloud SQL PostgreSQL)
-1. Create a Cloud SQL PostgreSQL instance:
-   ```bash
-   gcloud sql instances create notary-db \
-     --database-version=POSTGRES_16 \
-     --tier=db-f1-micro \
-     --region=$REGION
-   ```
+### models.py
+- ✅ Converted from RTF to plain Python
+- ✅ Database indexes optimized
 
-2. Create database and user:
-   ```bash
-   gcloud sql databases create notary_db --instance=notary-db
-   gcloud sql users create notary_user --instance=notary-db --password
-   ```
-
-3. Get connection string:
-   ```bash
-   gcloud sql instances describe notary-db --format="value(ipAddresses[0].ipAddress)"
-   # Format: postgresql://notary_user:PASSWORD@INSTANCE_IP:5432/notary_db
-   ```
-
-4. Set in Cloud Run or Kubernetes Secret:
-   ```bash
-   kubectl create secret generic notary-secrets \
-     --from-literal=database-url="postgresql://notary_user:PASSWORD@CLOUD_SQL_IP:5432/notary_db" \
-     -n notary-prod
-   ```
+### Dockerfile
+- ✅ Entrypoint script for better startup handling
+- ✅ Removed aggressive health check (Cloud Run manages it)
+- ✅ NullPool connection mode for Cloud Run
 
 ---
 
-## Monitoring and Logging
+## Testing Locally
 
-### Cloud Run Logs
 ```bash
-gcloud run services describe notary-api --region=$REGION
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=notary-api" --limit 50
+# Build image
+docker build -t notary-api:latest .
+
+# Run with PostgreSQL connection string
+docker run -d --name test-notary \
+  -p 8080:8080 \
+  -e DATABASE_URL="postgresql://user:pass@localhost/db" \
+  notary-api:latest
+
+# Health check
+curl http://localhost:8080/api/health
+
+# Stop
+docker stop test-notary
 ```
 
-### GKE Logs
-```bash
-kubectl logs -n notary-prod -l app=notary-api --all-containers=true -f
-kubectl describe pod -n notary-prod <POD_NAME>
-```
+---
 
-### Health Checks
+## Verification After Deployment
+
 ```bash
-# Test health endpoint after deployment
+# Get service URL
+gcloud run services describe notary-api --region=us-central1 --format="value(status.url)"
+
+# Test health endpoint
 curl https://<SERVICE_URL>/api/health
-```
 
----
-
-## Cleanup
-
-### Delete Cloud Run Service
-```bash
-gcloud run services delete notary-api --region=$REGION
-```
-
-### Delete GKE Cluster
-```bash
-gcloud container clusters delete notary-cluster --region=$REGION
-```
-
-### Delete Artifact Registry Repository
-```bash
-gcloud artifacts repositories delete $REPOSITORY --location=$REGION
+# View logs
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=notary-api" --limit=50
 ```
 
 ---
 
 ## Troubleshooting
 
-**Build fails with "permission denied"**
-- Ensure Cloud Build service account has `artifactregistry.writer` role
+**Still failing to start?**
+Check logs with detailed filter:
+```bash
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=notary-api AND severity=ERROR" --limit=20
+```
 
-**Image not pushed to registry**
-- Check build logs: `gcloud builds log <BUILD_ID>`
-- Verify repository exists: `gcloud artifacts repositories list`
+**Database connection issues?**
+Health check returns: `"database": "unavailable"` if connection fails
+- Verify Cloud SQL instance is running
+- Verify `--set-cloudsql-instances` flag is set correctly
+- Ensure service account has Cloud SQL Client role
 
-**Cloud Run deployment fails**
-- Check image exists: `gcloud artifacts docker images list $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY`
-- Verify port 8080 is exposed in Dockerfile
+**Port issues?**
+Cloud Run expects the app to listen on `$PORT` (8080 in this case)
+- Verify Dockerfile exposes port 8080
+- Verify uvicorn binds to 0.0.0.0:8080
 
-**Database connection error**
-- Ensure Cloud SQL instance is accessible from Cloud Run/GKE
-- For GKE, use Cloud SQL Proxy sidecar or configure firewall rules
+---
+
+## Database URL Formats
+
+### Development (SQLite)
+```
+DATABASE_URL="sqlite:///./data/notary_journal.db"
+```
+
+### Production (Cloud SQL PostgreSQL)
+```
+DATABASE_URL="postgresql+pg8000://user:password@cloudsql-instance/database"
+```
+With Cloud SQL proxy:
+```
+DATABASE_URL="postgresql://user:password@cloudsql-proxy:5432/database"
+```
+
+---
+
+## Next Steps After Successful Deployment
+
+1. **Add authentication/authorization** - Currently `--allow-unauthenticated`
+2. **Set custom domain** - Use Cloud Run custom domains feature
+3. **Add monitoring** - Set up Cloud Monitoring dashboards
+4. **Configure database backups** - Cloud SQL automated backups
+5. **Enable VPC** - Isolate service network access
