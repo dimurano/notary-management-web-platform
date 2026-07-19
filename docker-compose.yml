@@ -29,23 +29,23 @@ services:
       start_period: 5s
 
   # PostgreSQL service (commented out for development; uncomment for production-like setup)
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: notary-postgres
-  #   environment:
-  #     POSTGRES_USER: notary_user
-  #     POSTGRES_PASSWORD: notary_password
-  #     POSTGRES_DB: notary_db
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U notary_user -d notary_db"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+   postgres:
+     image: postgres:16-alpine
+     container_name: notary-postgres
+     environment:
+        POSTGRES_USER: notary_user
+        POSTGRES_PASSWORD: notary_password
+        POSTGRES_DB: notary_db
+     volumes:
+       - postgres_data:/var/lib/postgresql/data
+     ports:
+       - "5432:5432"
+     healthcheck:
+       test: ["CMD-SHELL", "pg_isready -U notary_user -d notary_db"]
+       interval: 10s
+       timeout: 5s
+       retries: 5
 
-# volumes:
-#   postgres_data:
-#     driver: local
+  volumes:
+   postgres_data:
+     driver: local
