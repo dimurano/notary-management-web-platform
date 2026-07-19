@@ -28,16 +28,16 @@ steps:
 
   # Step 4: (Optional) Deploy to Cloud Run
   # Uncomment and configure if you want automatic deployment
-  # - name: 'gcr.io/cloud-builders/run'
-  #   args:
-  #     - 'deploy'
-  #     - 'notary-api'
-  #     - '--image'
-  #     - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-  #     - '--region'
-  #     - 'us-central1'
-  #     - '--platform'
-  #     - 'managed'
+  - name: 'gcr.io/cloud-builders/run'
+    args:
+      - 'deploy'
+      - 'notary-api'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
 
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
