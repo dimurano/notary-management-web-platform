@@ -1,41 +1,43 @@
-import logging
-import os
-import uuid
-from datetime import datetime
-from typing import List, Optional
-
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, EmailStr
-from fastapi import UploadFile, File
-from fastapi.responses import FileResponse
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.pool import NullPool
-
-import models
-
-# Logging setup
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
-
-# Environment configuration
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "sqlite:///./data/notary_journal.db"
-)
-ALLOWED_ORIGINS = os.getenv(
-    "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:8000"
-).split(",")
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-
-logger.info(f"Starting Notary API in {ENVIRONMENT} mode")
-logger.info(f"Database URL: {DATABASE_URL[:50]}...")
-
+Python 3.14.6 (v3.14.6:c63aec69bd5, Jun 10 2026, 08:07:54) [Clang 21.0.0 (clang-2100.1.1.101)] on darwin
+Enter "help" below or click "Help" above for more information.
+>>> import logging
+... import os
+... import uuid
+... from datetime import datetime
+... from typing import List, Optional
+... 
+... from fastapi import FastAPI, Depends, HTTPException, status
+... from fastapi.middleware.cors import CORSMiddleware
+... from pydantic import BaseModel, EmailStr
+... from fastapi import UploadFile, File
+... from fastapi.responses import FileResponse
+... from sqlalchemy import create_engine, event
+... from sqlalchemy.orm import Session, sessionmaker
+... from sqlalchemy.pool import NullPool
+... 
+... import models
+... 
+... # Logging setup
+... logging.basicConfig(
+...     level=logging.INFO,
+...     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+... )
+... logger = logging.getLogger(__name__)
+... 
+... # Environment configuration
+... DATABASE_URL = os.getenv(
+...     "DATABASE_URL", 
+...     "sqlite:///./data/notary_journal.db"
+... )
+... ALLOWED_ORIGINS = os.getenv(
+...     "ALLOWED_ORIGINS",
+...     "http://localhost:3000,http://localhost:8000"
+... ).split(",")
+... ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+... 
+... logger.info(f"Starting Notary API in {ENVIRONMENT} mode")
+... logger.info(f"Database URL: {DATABASE_URL[:50]}...")
+... 
 # Database setup - with error handling for Cloud Run
 engine = None
 SessionLocal = None
