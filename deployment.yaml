@@ -126,7 +126,7 @@ metadata:
   name: notary-config
   namespace: notary-prod
 data:
-  allowed-origins: "https://yourdomain.com,https://www.yourdomain.com"
+  allowed-origins: "https://notarialsolutions.com,https://www.notarialsolutions.com"
 
 ---
 apiVersion: v1
@@ -136,4 +136,4 @@ metadata:
   namespace: notary-prod
 type: Opaque
 stringData:
-  database-url: "postgresql://user:password@cloudsql-proxy:5432/notary_db"
+  database-url: "postgresql://user:OaklandP69@cloudsql-proxy:5432/notary_db"
