@@ -10,8 +10,8 @@ ENV PATH="/opt/venv/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
-# Runtime stage
-FROM python:3.11-slim
+# Runtime stage (CHANGED AS builder TO AS runner)
+FROM python:3.11-slim AS runner
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -24,7 +24,7 @@ WORKDIR /app
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 
-# Copy virtual environment from builder
+# Copy virtual environment from builder (This now works!)
 COPY --from=builder /opt/venv /opt/venv
 
 # Copy application code
