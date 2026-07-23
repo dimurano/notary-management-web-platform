@@ -1,5 +1,4 @@
 steps:
-  
   # Step 1: Build Docker image and tag with commit SHA and latest
   - name: 'gcr.io/cloud-builders/docker'
     id: build
