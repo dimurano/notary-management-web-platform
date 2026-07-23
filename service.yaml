@@ -1,0 +1,70 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: notary-api   # Name of your Cloud Run service
+  namespace: "1079870257086"    # Replace with your GCP Project Number (optional)
+  labels:
+    ://googleapis.com: us-central1 # Target deployment region
+    commit-sha: e2a3d71514ee1a78dba7d44bff7454546d433857
+    gcb-build-id: f54a282b-1492-473e-8009-27942fc6fce3
+    gcb-trigger-id: d0696185-18ff-4078-8270-41a3ccbc4b8f
+    gcb-trigger-region: global
+    managed-by: gcp-cloud-build-deploy-cloud-run
+    cloud.googleapis.com/location: us-central1
+    
+  annotations:   
+    serving.knative.dev/creator: rfranco@notarialsolutions.com
+    serving.knative.dev/lastModifier: rfranco@notarialsolutions.com
+    run.googleapis.com/client-name: gcloud
+    run.googleapis.com/client-version: 576.0.0
+    run.googleapis.com/operation-id: d48a00fc-4b36-46e5-ac12-b2f47de8b245
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/invoker-iam-disabled: "true"
+    run.googleapis.com/maxScale: 20
+    run.googleapis.com/urls: "[\"https://notary-api-1079870257086.us-central1.run.app\"\
+      ,\"https://notary-api-vfikvads5q-uc.a.run.app\"]"
+spec:
+  template:
+    metadata:
+      labels:
+        client.knative.dev/nonce: lfmwdmzznd
+        commit-sha: e2a3d71514ee1a78dba7d44bff7454546d433857
+        gcb-build-id: f54a282b-1492-473e-8009-27942fc6fce3
+        gcb-trigger-id: 52b6ca54-c289-45ae-a5ae-58c2e85f79bb
+        gcb-trigger-region: global
+        managed-by: gcp-cloud-build-deploy-cloud-run
+        run.googleapis.com/startupProbeType: Default
+      annotations:
+        autoscaling.knative.dev/maxScale: 20
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 576.0.0
+        run.googleapis.com/cloudsql-instances: notary-management-web-platform:us-central1:notary-db-instance
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 3600
+      serviceAccountName: notary-api@notary-management-web-platform.iam.gserviceaccount.com
+      containers:
+      - name: placeholder-1
+        image: gcr.io/notary-management-web-platform/notary-api:latest
+        ports:
+        - name: http1
+          containerPort: 8080
+        env:
+        - name: ENVIRONMENT
+          value: production
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        startupProbe:
+          timeoutSeconds: 240
+          periodSeconds: 240
+          failureThreshold: 1
+          tcpSocket:
+            port: 8080
+  traffic:
+  - percent: 100
+    latestRevision: true
+
