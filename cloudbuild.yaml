@@ -1,38 +1,43 @@
- # Step 1: Build Docker image and tag with commit SHA and latest
- - name: 'gcr.io/cloud-builders/docker'
-   env:
-   - 'DOCKER_BUILDKIT=1'
-   args: ['build', '-t', 'gcr.io/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA']
-   images:
-  - 'gcr.io/$PROJECT_ID/notary-repository/notary-api:latest'
-  
-  # Step 2: Push image with commit SHA tag to Artifact Registry
+steps:
+  # Step 1: Build the image with both tags using Artifact Registry paths
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-image
+    env:
+      - 'DOCKER_BUILDKIT=1'
+    args: 
+      - 'build'
+      - '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+      - '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+      - '.'
+
+  # Step 2: Push the SHA tagged image
   - name: 'gcr.io/cloud-builders/docker'
     id: push-sha
     args:
       - 'push'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
 
-  # Step 3: Push latest tag
+  # Step 3: Push the latest tagged image
   - name: 'gcr.io/cloud-builders/docker'
     id: push-latest
     args:
       - 'push'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
 
-  # Step 4: (Optional) Deploy to Cloud Run
-  # Uncomment and configure if you want automatic deployment
-  - name: 'gcr.io/cloud-builders/run'
+  # Step 4: Deploy to Cloud Run
+  - name: 'gcr.io/://google.com'
+    id: deploy-cloud-run
+    entrypoint: gcloud
     args:
+      - 'run'
       - 'deploy'
       - 'notary-api'
-      - '--image'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-      - '--region'
-      - 'us-central1'
-      - '--platform'
-      - 'managed'
+      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
 
+# Images block registers the output images with Cloud Build tracking
 images:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
@@ -40,5 +45,4 @@ images:
 options:
   machineType: 'N1_HIGHCPU_8'
   logging: CLOUD_LOGGING_ONLY
-
-timeout: '3600s'
+  timeout: '3600s'
