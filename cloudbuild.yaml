@@ -1,10 +1,4 @@
 steps:
-  # steps 0:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: 'build', '-t', 'gcr.io/$PROJECT_ID/us-central1-docker.pkg.dev/notary-management-web-platform/cloud-run-source-deploy'
-    
-  # Points to:
-          './Users/rmf69/notary-backend/'
   
   # Step 1: Build Docker image and tag with commit SHA and latest
   - name: 'gcr.io/cloud-builders/docker'
@@ -16,7 +10,7 @@ steps:
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
       - '-f'
-      - 'Dockerfile'
+      - '/Users/rmf69/notary-backend/Dockerfile'
       - '.'
 
   # Step 2: Push image with commit SHA tag to Artifact Registry
