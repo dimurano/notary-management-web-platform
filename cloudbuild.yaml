@@ -1,17 +1,11 @@
-steps:
-  # Step 1: Build Docker image and tag with commit SHA and latest
-  - name: 'gcr.io/cloud-builders/docker'
-    id: build
-    args:
-      - 'build'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
-      - '-f'
-      - 'Dockerfile'
-      - '.'
-
+ # Step 1: Build Docker image and tag with commit SHA and latest
+ - name: 'gcr.io/cloud-builders/docker'
+   env:
+   - 'DOCKER_BUILDKIT=1'
+   args: ['build', '-t', 'gcr.io/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA']
+   images:
+  - 'gcr.io/$PROJECT_ID/notary-repository/notary-api:latest'
+  
   # Step 2: Push image with commit SHA tag to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
     id: push-sha
