@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.14-slim
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 COPY requirements.txt .
