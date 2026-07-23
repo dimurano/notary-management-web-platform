@@ -19,8 +19,6 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8080 \
     PATH="/opt/venv/bin:$PATH"
 
-# ... (Top half of your Dockerfile remains the same)
-
 WORKDIR /app
 
 # Create non-root user for security
