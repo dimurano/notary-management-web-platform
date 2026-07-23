@@ -28,14 +28,14 @@ services:
       retries: 3
       start_period: 5s
 
-  # PostgreSQL service (commented out for development; uncomment for production-like setup)
+   PostgreSQL service (commented out for development; uncomment for production-like setup)
    postgres:
      image: postgres:16-alpine
      container_name: notary-postgres
      environment:
-        POSTGRES_USER: notary_user
-        POSTGRES_PASSWORD: notary_password
-        POSTGRES_DB: notary_db
+       POSTGRES_USER: notary_user
+       POSTGRES_PASSWORD: notary_password
+       POSTGRES_DB: notary_db
      volumes:
        - postgres_data:/var/lib/postgresql/data
      ports:
@@ -46,6 +46,6 @@ services:
        timeout: 5s
        retries: 5
 
-  volumes:
+ volumes:
    postgres_data:
      driver: local
