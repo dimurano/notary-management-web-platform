@@ -10,7 +10,7 @@ steps:
       - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
       - '-f'
-      - '/Users/rmf69/notary-backend/Dockerfile'
+      - 'Dockerfile'
       - '.'
 
   # Step 2: Push image with commit SHA tag to Artifact Registry
