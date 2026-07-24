@@ -19,6 +19,8 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8080 \
     PATH="/opt/venv/bin:$PATH"
 
+CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
+
 WORKDIR /app
 
 # Create non-root user for security
@@ -45,4 +47,3 @@ USER appuser
 EXPOSE 8080
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-
