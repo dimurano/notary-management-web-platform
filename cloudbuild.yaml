@@ -36,6 +36,10 @@ steps:
       - '--region=us-central1'
       - '--platform=managed'
       - '--allow-unauthenticated'
+      
+  # Steps 5:
+  - name: 'ubuntu'
+    script: 'pwd'
 
 # Images block registers the output images with Cloud Build tracking
 images:
