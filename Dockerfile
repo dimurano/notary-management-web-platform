@@ -20,6 +20,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH"
 
 CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
+CMD exec gunicorn --bind 0.0.0.0:$PORT main:app
 
 WORKDIR /app
 
