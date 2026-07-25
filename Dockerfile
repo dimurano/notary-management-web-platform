@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt
 
 # Runtime stage (CHANGED AS builder TO AS runner)
-FROM python:3.11-slim AS runner
+FROM python:3.14-slim AS runner
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
