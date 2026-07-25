@@ -1,8 +1,12 @@
 # Build stage
-FROM python:3.14-slim
+FROM python:3.14-slim AS builder
 
 WORKDIR /workspace
 COPY . .
+# Recommended virtual environment creation in builder stage
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Option A: For Flask apps using Gunicorn
@@ -22,9 +26,6 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8080 \
     PATH="/opt/venv/bin:$PATH"
-
-CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
-CMD exec gunicorn --bind 0.0.0.0:$PORT main:app
 
 WORKDIR /app
 
@@ -47,6 +48,8 @@ RUN mkdir -p /app/data /tmp && \
 
 # 4. NOW safe to switch to the non-root user
 USER appuser
+
+CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
 
 # Expose port
 EXPOSE 8080
