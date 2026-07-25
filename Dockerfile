@@ -1,8 +1,12 @@
 # Build stage
-FROM python:3.14-slim AS builder
+FROM python:3.14-slim
 
-WORKDIR /build
-COPY requirements.txt .
+WORKDIR /workspace
+COPY . .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Option A: For Flask apps using Gunicorn
+CMD exec gunicorn --bind 0.0.0.0:$PORT main:app
 
 # Install dependencies in a virtual environment
 RUN python -m venv /opt/venv
