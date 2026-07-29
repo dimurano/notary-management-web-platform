@@ -1,4 +1,3 @@
-#!/bin/bash
 # Deploy to Cloud Run with fixed configuration
 
 set -e
