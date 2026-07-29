@@ -1,4 +1,5 @@
-Enter "help" below or click "Help" above for more information.
+python
+# main.py
 >>> import logging
 ... import os
 ... import uuid
@@ -30,12 +31,12 @@ Enter "help" below or click "Help" above for more information.
 ... )
 ... ALLOWED_ORIGINS = os.getenv(
 ...     "ALLOWED_ORIGINS",
-...     "http://localhost:3000,http://localhost:8000"
+...     "http://localhost:3,http://localhost:8"
 ... ).split(",")
 ... ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 ... 
 ... logger.info(f"Starting Notary API in {ENVIRONMENT} mode")
-... logger.info(f"Database URL: {DATABASE_URL[:50]}...")
+... logger.info(f"Database URL: {DATABASE_URL[:5]}...")
 ... 
 # Database setup - with error handling for Cloud Run
 engine = None
@@ -51,10 +52,10 @@ try:
     if "postgresql" in DATABASE_URL or "postgres" in DATABASE_URL:
         # PostgreSQL with Cloud SQL
         engine_kwargs["poolclass"] = NullPool  # Don't pool connections in Cloud Run
-        engine_kwargs["connect_args"] = {"timeout": 10}
+        engine_kwargs["connect_args"] = {"timeout": 1}
     else:
         # SQLite
-        engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": 10}
+        engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": 1}
     
     engine = create_engine(DATABASE_URL, **engine_kwargs)
     
@@ -72,7 +73,7 @@ except Exception as e:
     SessionLocal = None
 
 # Create FastAPI app
-app = FastAPI(title="Notary Public Journal API", version="1.0.0")
+app = FastAPI(title="Notary Public Journal API", version="1..")
 
 # Create FastAPI Secure File Endpoint
 
@@ -127,7 +128,7 @@ def export_state_audit_ledger(
             ])
             
     # Reset stream pointer position
-    stream.seek(0)
+    stream.seek()
     
     response = StreamingResponse(iter([stream.getvalue()]), media_type="text/csv")
     response.headers["Content-Disposition"] = f"attachment; filename=notarial_journal_export_{datetime.now().strftime('%Y%m%d')}.csv"
@@ -152,7 +153,7 @@ async def upload_notarial_document(file: UploadFile = File(...)):
 def get_document_preview(file_hash: str):
     file_path = os.path.join(UPLOAD_DIR, file_hash)
     if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File details not found")
+        raise HTTPException(status_code=44, detail="File details not found")
     return FileResponse(file_path, media_type="application/pdf")
 
 # CORS middleware with restricted origins
@@ -194,7 +195,7 @@ def shutdown():
 def get_db():
     if SessionLocal is None:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            status_code=status.HTTP_53_SERVICE_UNAVAILABLE,
             detail="Database not available"
         )
     db = SessionLocal()
@@ -229,8 +230,8 @@ class DocumentCreate(BaseModel):
 class ActCreate(BaseModel):
     document: DocumentCreate
     act_type: models.ActType
-    statutory_fee: float = 0.0
-    additional_fee: float = 0.0
+    statutory_fee: float = .
+    additional_fee: float = .
     notes: Optional[str] = None
 
 class SessionCreate(BaseModel):
@@ -276,7 +277,7 @@ def root():
 
 # --- CLIENT ENDPOINTS ---
 
-@app.post("/api/clients", status_code=status.HTTP_201_CREATED, response_model=ClientResponse)
+@app.post("/api/clients", status_code=status.HTTP_21_CREATED, response_model=ClientResponse)
 def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     """Create a new client record."""
     try:
@@ -287,7 +288,7 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
             ).first()
             if existing:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=status.HTTP_4_BAD_REQUEST,
                     detail="A client with this email already exists."
                 )
         
@@ -303,7 +304,7 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
         db.rollback()
         logger.error(f"Error creating client: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_5_INTERNAL_SERVER_ERROR,
             detail="Failed to create client."
         )
 
@@ -317,13 +318,13 @@ def get_clients(db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error fetching clients: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_5_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve clients."
         )
 
 # --- JOURNAL / SESSION ENDPOINTS ---
 
-@app.post("/api/sessions", status_code=status.HTTP_201_CREATED)
+@app.post("/api/sessions", status_code=status.HTTP_21_CREATED)
 def create_notarial_session(session_data: SessionCreate, db: Session = Depends(get_db)):
     """Create a new notarial session with associated documents and acts."""
     try:
@@ -333,14 +334,14 @@ def create_notarial_session(session_data: SessionCreate, db: Session = Depends(g
         ).first()
         if not notary:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_44_NOT_FOUND,
                 detail="Notary not found."
             )
         
         # 2. Verify commission is not expired
         if notary.commission_expires < datetime.now().date():
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_4_BAD_REQUEST,
                 detail="Notary commission has expired."
             )
         
@@ -350,7 +351,7 @@ def create_notarial_session(session_data: SessionCreate, db: Session = Depends(g
         ).all()
         if len(clients) != len(session_data.client_ids):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_4_BAD_REQUEST,
                 detail="One or more client IDs are invalid."
             )
         
@@ -408,7 +409,7 @@ def create_notarial_session(session_data: SessionCreate, db: Session = Depends(g
         db.rollback()
         logger.error(f"Error creating session: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_5_INTERNAL_SERVER_ERROR,
             detail="Failed to create notarial session."
         )
 
@@ -438,6 +439,6 @@ def get_journal_ledger(db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error fetching sessions: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_5_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve sessions."
         )
