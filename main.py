@@ -1,6 +1,6 @@
 python
 # main.py
->>> import logging
+    import logging
 ... import os
 ... import uuid
 ... from datetime import datetime
