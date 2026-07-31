@@ -18,22 +18,22 @@ from sqlalchemy.pool import NullPool
 logging.basicConfig(
      level=logging.INFO,
      format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+  )
 logger = logging.getLogger(__name__)
+
+# Environment configuration
+DATABASE_URL = os.getenv(
+  "DATABASE_URL", 
+  "sqlite:///./data/notary_journal.db"
+  )
+ALLOWED_ORIGINS = os.getenv(
+  "ALLOWED_ORIGINS",
+  "http://localhost:3,http://localhost:8"
+  ).split(",")
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
  
- # Environment configuration
- DATABASE_URL = os.getenv(
-     "DATABASE_URL", 
-     "sqlite:///./data/notary_journal.db"
- )
- ALLOWED_ORIGINS = os.getenv(
-     "ALLOWED_ORIGINS",
-     "http://localhost:3,http://localhost:8"
- ).split(",")
- ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
- 
- logger.info(f"Starting Notary API in {ENVIRONMENT} mode")
- logger.info(f"Database URL: {DATABASE_URL[:5]}...")
+logger.info(f"Starting Notary API in {ENVIRONMENT} mode")
+logger.info(f"Database URL: {DATABASE_URL[:5]}...")
  
 # Database setup - with error handling for Cloud Run
 engine = None
