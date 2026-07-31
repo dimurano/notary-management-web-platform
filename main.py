@@ -22,7 +22,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Environment configuration
-DATABASE_URL = os.getenv(
+DATABASE_URL = os.getenv(...)
   "DATABASE_URL", 
   "sqlite:///./data/notary_journal.db"
   )
