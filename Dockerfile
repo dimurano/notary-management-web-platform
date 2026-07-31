@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.14-slim AS builder
+FROM --platform=linux/amd64 python:3.14-slim AS builder
 
 WORKDIR /workspace
 COPY . .
