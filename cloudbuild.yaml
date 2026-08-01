@@ -1,52 +1,63 @@
+# Cloud Build pipeline: build, push, deploy to Cloud Run
+# Add/override substitutions in the Cloud Build trigger as needed.
+substitutions:
+  _SERVICE: "notary-api"
+  _REPOSITORY: "notary-repository"
+  _LOCATION: "us-central1"
+
 steps:
-  # Step 1: Build the image with both tags using Artifact Registry paths
-  - name: 'gcr.io/cloud-builders/docker'
-    id: build-image
+  # Build image and tag both $SHORT_SHA and latest
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-image"
     env:
-      - 'DOCKER_BUILDKIT=1'
-    args: 
-      - 'build'
-      - '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-      - '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
-      - '.'
-
-  # Step 2: Push the SHA tagged image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: push-sha
+      - "DOCKER_BUILDKIT=1"
     args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
+      - "build"
+      - "-t"
+      - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:$SHORT_SHA"
+      - "-t"
+      - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:latest"
+      - "."
 
-  # Step 3: Push the latest tagged image
-  - name: 'gcr.io/cloud-builders/docker'
-    id: push-latest
+  # Push the SHA-tagged image
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-sha"
+    waitFor: ["build-image"]
     args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+      - "push"
+      - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:$SHORT_SHA"
 
-  # Step 4: Deploy to Cloud Run
-  - name: 'gcr.io/://google.com'
-    id: deploy-cloud-run
-    entrypoint: gcloud
+  # Push the latest tag
+  - name: "gcr.io/cloud-builders/docker"
+    id: "push-latest"
+    waitFor: ["push-sha"]
     args:
-      - 'run'
-      - 'deploy'
-      - 'notary-api'
-      - '--image=us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-      - '--region=us-central1'
-      - '--platform=managed'
-      - '--allow-unauthenticated'
-      
-  # Steps 5:
-  - name: 'ubuntu'
-    script: 'pwd'
+      - "push"
+      - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:latest"
 
-# Images block registers the output images with Cloud Build tracking
+  # Deploy to Cloud Run using the gcloud builder
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: "deploy-cloud-run"
+    waitFor: ["push-latest"]
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        # By default deploy without allowing unauthenticated access.
+        # If you need public access, add --allow-unauthenticated
+        gcloud run deploy $_SERVICE \
+          --image=$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:$SHORT_SHA \
+          --region=$_LOCATION \
+          --platform=managed \
+          --project=$PROJECT_ID \
+          --no-allow-unauthenticated
+
+# Register produced images with Cloud Build
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:$SHORT_SHA'
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/notary-repository/notary-api:latest'
+  - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:$SHORT_SHA"
+  - "$_LOCATION-docker.pkg.dev/$PROJECT_ID/$_REPOSITORY/$_SERVICE:latest"
 
 options:
-  machineType: 'N1_HIGHCPU_8'
+  machineType: "N1_HIGHCPU_8"
   logging: CLOUD_LOGGING_ONLY
-  timeout: '3600s'
+  timeout: "3600s"
