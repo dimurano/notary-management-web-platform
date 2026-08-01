@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notary-ingress
+  annotations:
+    networking.gke.io/managed-certificates: "notary-ssl-cert"
+    kubernetes.io/ingress.class: "gce"
+spec:
+  rules:
+  - host: notarialsolutions.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: deployment-2-service
+            port:
+              number: 80
