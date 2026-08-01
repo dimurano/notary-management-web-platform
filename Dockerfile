@@ -51,4 +51,4 @@ CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
 # Expose port
 EXPOSE 8080
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app/start.sh"]
