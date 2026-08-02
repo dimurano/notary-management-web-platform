@@ -66,5 +66,16 @@ spec:
             port: 8080
   traffic:
   - percent: 100
-    latestRevision: true
+  
+  metadata:
+    name: "MC_SERVICE_NAME"
+    labels:
+      cloud.googleapis.com/location: "REGION"
+    annotations:
+     # Required to use Cloud Run multi-containers (preview feature)
+     run.googleapis.com/launch-stage: BETA
+     run.googleapis.com/description: sample tutorial service
+     # Externally available
+     run.googleapis.com/ingress: all
+     latestRevision: true
 
