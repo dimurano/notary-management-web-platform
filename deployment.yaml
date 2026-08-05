@@ -34,9 +34,14 @@ spec:
         runAsUser: 1000
         fsGroup: 1000
       containers:
-      - name: notary-api
-        image: us-central1-docker.pkg.dev/PROJECT_ID/notary-repository/notary-api:latest
-        imagePullPolicy: Always
+        - image: us-central1-docker.pkg.dev/notary-management-web-platform/cloud-run-source-deploy/notary-management-web-platform/notary-management-web-platform-last:c2ca2bc4fed664a6a1c8698853f6978db99776ac
+          imagePullPolicy: IfNotPresent
+          name: notary-management-web-platform-last-1
+          command: ["python3"]
+          args: ["main.py"] 
+          resources:
+          limits:
+            ephemeral-storage: 1Gi
         ports:
         - name: http
           containerPort: 8080
