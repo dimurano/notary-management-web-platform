@@ -1,0 +1,82 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: notary-api
+  namespace: "1079870257086"
+  labels:
+    ://googleapis.com: us-central1
+    commit-sha: e2a3d71514ee1a78dba7d44bff7454546d433857
+    gcb-build-id: f54a282b-1492-473e-8009-27942fc6fce3
+    gcb-trigger-id: d0696185-18ff-4078-8270-41a3ccbc4b8f
+    gcb-trigger-region: global
+    managed-by: gcp-cloud-build-deploy-cloud-run
+  annotations:   
+    serving.knative.dev/creator: rfranco@notarialsolutions.com
+    serving.knative.dev/lastModifier: rfranco@notarialsolutions.com
+    ://googleapis.com: gcloud
+    ://googleapis.com: 576.0.0
+    ://googleapis.com: d48a00fc-4b36-46e5-ac12-b2f47de8b245
+    ://googleapis.com: all
+    ://googleapis.com-status: all
+    ://googleapis.com: "true"
+    ://googleapis.com: 20
+    ://googleapis.com: BETA 
+    ://googleapis.com: sample tutorial service
+    ://googleapis.com: "[\"https://run.app\"\
+      ,\"https://run.app\"]"
+spec:
+  template:
+    metadata:
+      labels:
+        client.knative.dev/nonce: lfmwdmzznd
+        commit-sha: e2a3d71514ee1a78dba7d44bff7454546d433857
+        gcb-build-id: f54a282b-1492-473e-8009-27942fc6fce3
+        gcb-trigger-id: 52b6ca54-c289-45ae-a5ae-58c2e85f79bb
+        gcb-trigger-region: global
+        managed-by: gcp-cloud-build-deploy-cloud-run
+        ://googleapis.com: Default
+      annotations:
+        autoscaling.knative.dev/maxScale: 20
+        ://googleapis.com: gcloud
+        ://googleapis.com: 576.0.0
+        ://googleapis.com: notary-management-web-platform:us-central1:notary-db-instance
+        ://googleapis.com: 'true'
+        # Crucial: Nginx waits for 'hello' container to start up first
+        ://googleapis.com: '{"nginx": ["hello"]}'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 3600
+      serviceAccountName: notary-api@://gserviceaccount.com
+      containers:
+      # 1st Container: Your Main App (Renamed to 'hello' to match dependencies)
+      - name: hello  
+        image: gcr.io/notary-management-web-platform/notary-api:latest
+        # Note: No 'ports' array block here. This prevents external traffic 
+        # from hitting this container directly. It is only accessible via localhost.
+        env:
+        - name: ENVIRONMENT
+          value: production
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        startupProbe:
+          timeoutSeconds: 240
+          periodSeconds: 240
+          failureThreshold: 1
+          tcpSocket:
+            port: 8080
+
+      # 2nd Container: The Nginx Reverse Proxy (Handles all ingress traffic)
+      - name: nginx
+        image: gcr.io/notary-management-web-platform/nginx-sidecar:latest 
+        ports:
+        - name: http1
+          containerPort: 80  # Cloud Run will route external public traffic to this port
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+  traffic:
+  - percent: 100
+    latestRevision: true
