@@ -1,5 +1,7 @@
 # Cloud Build pipeline: build, push, deploy to Cloud Run
 # Add/override substitutions in the Cloud Build trigger as needed.
+timeout: "3600s" # Correct: top-level field
+
 substitutions:
   _SERVICE: "notary-api"
   _REPOSITORY: "notary-repository"
@@ -60,4 +62,3 @@ images:
 options:
   machineType: "N1_HIGHCPU_8"
   logging: CLOUD_LOGGING_ONLY
-  timeout: "3600s"
