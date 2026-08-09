@@ -50,7 +50,7 @@ steps:
           --region=$_LOCATION \
           --platform=managed \
           --project=$PROJECT_ID \
-          --no-allow-unauthenticated
+          --allow-unauthenticated
 
 # Register produced images with Cloud Build
 images:
