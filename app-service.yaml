@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-public-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: component : frontend # Change this to match your deployment's pod label
+  ports:
+    - protocol: TCP
+      port: 80        # The public port you want to use
+      targetPort: 8080 # The internal port your application listens on
