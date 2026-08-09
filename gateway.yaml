@@ -1,0 +1,13 @@
+kind: Gateway
+apiVersion: gateway.networking.k8s.io/v1
+metadata:
+  name: external-http-gateway
+spec:
+  gatewayClassName: gke-l7-global-external-managed # GKE's managed external Application Load Balancer
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      namespaces:
+        from: Same # Only allow HTTPRoutes from the same namespace
