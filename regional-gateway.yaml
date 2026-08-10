@@ -20,4 +20,4 @@
     # You can also use the `IPAddress` type to specify the actual IP address.
     addresses:
     - type: NamedAddress
-      value: endofpoint
+      value: ext-loadb-bal
