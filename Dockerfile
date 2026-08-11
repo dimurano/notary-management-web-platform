@@ -2,6 +2,7 @@
 FROM --platform=linux/amd64 python:3.14-slim AS builder
 
 WORKDIR /workspace
+COPY start.sh .
 COPY . .
 # Recommended virtual environment creation in builder stage
 RUN python -m venv /opt/venv
