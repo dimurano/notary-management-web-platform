@@ -37,7 +37,7 @@ COPY --chown=appuser:appuser . .
 COPY --chown=appuser:appuser entrypoint.sh /app/entrypoint.sh
 
 # 2. Grant execution permissions while still logged in as ROOT
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh exec "$@"
 
 # 3. Create writable directories and set ownership for the whole app folder
 RUN mkdir -p /app/data /tmp && \
@@ -51,4 +51,4 @@ CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
 # Expose port
 EXPOSE 8080
 
-ENTRYPOINT ["/app/start.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
