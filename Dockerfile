@@ -1,55 +1,35 @@
-# Build stage
-FROM --platform=linux/amd64 python:3.14-slim AS builder
+# Use the official slim Python base image
+FROM python:3.12-slim
 
-WORKDIR /workspace
-COPY start.sh .
-COPY . .
-# Recommended virtual environment creation in builder stage
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+# Set environment variables to optimize Python execution
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Install dependencies in a virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Runtime stage (CHANGED AS builder TO AS runner)
-FROM python:3.14-slim AS runner
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PORT=8080 \
-    PATH="/opt/venv/bin:$PATH"
-
+# Set the working directory inside the container
 WORKDIR /app
 
-# Create non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Install system dependencies if required (Optional: omit if your app only needs pip packages)
+# RUN apt-get update && apt-get install -y --no-install-recommends \
+#     curl \
+#     && rm -rf /var/lib/apt/lists/*
 
-# Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
+# Copy only requirements first to leverage Docker layer caching
+COPY requirements.txt .
 
-# 1. Copy application code AND entrypoint script first
-COPY --chown=appuser:appuser . .
-COPY --chown=appuser:appuser entrypoint.sh /app/entrypoint.sh
+# Install Python packages
+RUN pip install -r requirements.txt
 
-# 2. Grant execution permissions while still logged in as ROOT
-RUN chmod +x /app/entrypoint.sh exec $@
+# Copy the rest of the application code
+COPY . .
 
-# 3. Create writable directories and set ownership for the whole app folder
-RUN mkdir -p /app/data /tmp && \
-    chown -R appuser:appuser /app /tmp
-
-# 4. NOW safe to switch to the non-root user
+# Create and switch to a non-privileged user for security compliance
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
 USER appuser
 
-CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT
+# Expose the application port (change to match your app)
+EXPOSE 8000
 
-# Expose port
-EXPOSE 8080
-
-ENTRYPOINT /app/entrypoint.sh $@
+# Run the application
+CMD ["python", "main.py"]
