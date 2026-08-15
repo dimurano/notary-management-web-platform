@@ -1,13 +1,19 @@
+apiVersion: networking.istio.io/v1beta1
 kind: Gateway
-apiVersion: gateway.networking.k8s.io/v1
 metadata:
-  name: external-http-gateway
+  name: external-gateway
+  namespace: default
 spec:
   gatewayClassName: gke-l7-global-external-managed # GKE's managed external Application Load Balancer
-  listeners:
-  - name: http
-    protocol: HTTP
-    port: 80
-    allowedRoutes:
-      namespaces:
-        from: Same # Only allow HTTPRoutes from the same namespace
+  selector:
+    istio: ingressgateway # Match your ingress gateway controller labels
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: gateway-certs # Must match the Secret name created in Step 1
+    hosts:
+    - app.notarialsolutions.com # Replace with your external domain
