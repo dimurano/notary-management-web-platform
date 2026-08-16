@@ -148,3 +148,4 @@ class NotarialSession(Base):
     acts = relationship("ActDocument", back_populates="session", cascade="all, delete-orphan")
 
 
+
