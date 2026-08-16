@@ -145,6 +145,6 @@ class NotarialSession(Base):
     
     # Relationships
     clients = relationship("Client", secondary=client_sessions, back_populates="sessions")
-    acts = relationship("ActDocument", back_populates="session", cascade="all, delete-orphan"
+    acts = relationship("ActDocument", back_populates="session", cascade="all, delete-orphan")
 
 
