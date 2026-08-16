@@ -1,19 +1,29 @@
-apiVersion: networking.istio.io/v1beta1
+apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: external-gateway
+  name: external-regional-http
   namespace: default
 spec:
-  gatewayClassName: gke-l7-global-external-managed # GKE's managed external Application Load Balancer
-  selector:
-    istio: ingressgateway # Match your ingress gateway controller labels
-  servers:
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
+  gatewayClassName: gke-l7-regional-external-managed
+  listeners:
+  - name: https
+    protocol: HTTPS
+    port: 443
     tls:
-      mode: SIMPLE
-      credentialName: gateway-certs # Must match the Secret name created in Step 1
-    hosts:
-    - app.notarialsolutions.com # Replace with your external domain
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: wsg-certs
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-app-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: external-regional-http
+  rules:
+  - backendRefs:
+    - name: app.notarialsolutions.com # Replace with your actual Kubernetes Service name
+      port: 8080                 # Replace with your actual Service port
