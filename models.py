@@ -122,9 +122,6 @@ class ActDocument(Base):
 # RON & E-Signature Backend Database Updates
     from sqlalchemy import Column, String, Boolean, DateTime
     # (Keep your existing file imports intact)
-
-class NotarialSession(Base):
-    __tablename__ = 'notarial_sessions'
     
     # --- Existing Baseline Columns ---
     session_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
