@@ -2,7 +2,7 @@ from datetime import datetime
 import enum
 from typing import List, Optional
 from uuid import uuid4
-from sqlalchemy import Column, String, Integer, Numeric, DateTime, Date, ForeignKey, Table, Enum, Index
+from sqlalchemy import Column, String, Boolean, Integer, Numeric, DateTime, Date, ForeignKey, Table, Enum, Index
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
