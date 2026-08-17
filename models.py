@@ -2,7 +2,21 @@ from datetime import datetime
 import enum
 from typing import List, Optional
 from uuid import uuid4
-from sqlalchemy import Column, String, Boolean, Integer, Numeric, DateTime, Date, ForeignKey, Table, Enum, Index
+from decimal import Decimal
+from sqlalchemy import (
+    Column,
+    String,
+    Boolean,
+    Integer,
+    Numeric,
+    DateTime,
+    Date,
+    ForeignKey,
+    Table,
+    Enum as SQLEnum,
+    Index,
+    CheckConstraint,
+)
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -56,6 +70,9 @@ class Notary(Base):
     commission_expires = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<Notary {self.first_name} {self.last_name} ({self.notary_id})>"
+
 class Client(Base):
     __tablename__ = 'clients'
     client_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
@@ -72,17 +89,23 @@ class Client(Base):
     identifications = relationship("ClientIdentification", back_populates="client", cascade="all, delete-orphan")
     sessions = relationship("NotarialSession", secondary=client_sessions, back_populates="clients")
 
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<Client {self.first_name} {self.last_name} ({self.client_id})>"
+
 class ClientIdentification(Base):
     __tablename__ = 'client_identifications'
     id_verification_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
     client_id = Column(String(36), ForeignKey('clients.client_id', ondelete='CASCADE'), index=True)
-    identification_type = Column(Enum(IdType), nullable=False)
+    identification_type = Column(SQLEnum(IdType, native_enum=False), nullable=False)
     id_number = Column(String(50), nullable=False)
     issuer_state_country = Column(String(50), nullable=False)
     issue_date = Column(Date)
     expiry_date = Column(Date, nullable=False)
     
     client = relationship("Client", back_populates="identifications")
+
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<ClientIdentification {self.id_verification_id} type={self.identification_type}>"
 
 class NotarialSession(Base):
     __tablename__ = 'notarial_sessions'
@@ -92,12 +115,25 @@ class NotarialSession(Base):
     location_type = Column(String(20), nullable=False)
     meeting_address = Column(String(255))
     notes = Column(String)
-    total_fee = Column(Numeric(10, 2), default=0.00)
-    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid, index=True)
-    payment_method = Column(Enum(PaymentMethod))
-    
+    total_fee = Column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    payment_status = Column(SQLEnum(PaymentStatus, native_enum=False), default=PaymentStatus.unpaid, index=True)
+    payment_method = Column(SQLEnum(PaymentMethod, native_enum=False))
+
+    # RON / e-signature fields
+    is_ron = Column(Boolean, default=False, nullable=False)
+    ron_platform = Column(String(100))  # e.g., 'DocuSign RON', 'Notarize'
+    session_audio_video_url = Column(String(500))
+    tamper_evident_seal_id = Column(String(100))
+
     clients = relationship("Client", secondary=client_sessions, back_populates="sessions")
     acts = relationship("ActDocument", back_populates="session", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        CheckConstraint('total_fee >= 0', name='ck_notarial_sessions_total_fee_non_negative'),
+    )
+
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<NotarialSession {self.session_id} date={self.session_date} notary={self.notary_id}>"
 
 class Document(Base):
     __tablename__ = 'documents'
@@ -106,43 +142,26 @@ class Document(Base):
     page_count = Column(Integer, default=1)
     file_path_hash = Column(String(255), index=True)
 
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<Document {self.document_title} ({self.document_id})>"
+
 class ActDocument(Base):
-    __tablename__ = 'acts_documents'
+    __tablename__ = 'act_documents'
     act_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
     session_id = Column(String(36), ForeignKey('notarial_sessions.session_id', ondelete='CASCADE'), index=True)
     document_id = Column(String(36), ForeignKey('documents.document_id', ondelete='RESTRICT'), index=True)
-    act_type = Column(Enum(ActType), nullable=False)
-    statutory_fee = Column(Numeric(10, 2), default=0.00)
-    additional_fee = Column(Numeric(10, 2), default=0.00)
+    act_type = Column(SQLEnum(ActType, native_enum=False), nullable=False)
+    statutory_fee = Column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
+    additional_fee = Column(Numeric(10, 2), default=Decimal("0.00"), nullable=False)
     notes = Column(String)
     
     session = relationship("NotarialSession", back_populates="acts")
     document = relationship("Document")
 
-# RON & E-Signature Backend Database Updates
-    from sqlalchemy import Column, String, Boolean, DateTime
-    # (Keep your existing file imports intact)
-    
-    # --- Existing Baseline Columns ---
-    session_id = Column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    notary_id = Column(String(36), ForeignKey('notaries.notary_id'))
-    session_date = Column(DateTime, nullable=False, default=datetime.utcnow)
-    location_type = Column(String(20), nullable=False) # 'In-Office', 'Mobile', 'RON'
-    meeting_address = Column(String(255))
-    notes = Column(String)
-    total_fee = Column(Numeric(10, 2), default=0.00)
-    payment_status = Column(Enum(PaymentStatus), default=PaymentStatus.unpaid)
-    payment_method = Column(Enum(PaymentMethod))
+    __table_args__ = (
+        CheckConstraint('statutory_fee >= 0', name='ck_act_documents_statutory_fee_non_negative'),
+        CheckConstraint('additional_fee >= 0', name='ck_act_documents_additional_fee_non_negative'),
+    )
 
-    # --- Extended Compliance Columns for RON & E-Signatures ---
-    is_ron = Column(Boolean, default=False, nullable=False)
-    ron_platform = Column(String(100)) # e.g., 'DocuSign RON', 'Notarize', 'BlueNotary'
-    session_audio_video_url = Column(String(500)) # Link to required 5-to-10 year cloud storage archive
-    tamper_evident_seal_id = Column(String(100))  # Reference hash of the digital cryptographic signature seal
-    
-    # Relationships
-    clients = relationship("Client", secondary=client_sessions, back_populates="sessions")
-    acts = relationship("ActDocument", back_populates="session", cascade="all, delete-orphan")
-
-
-
+    def __repr__(self) -> str:  # pragma: no cover - trivial
+        return f"<ActDocument {self.act_id} type={self.act_type}>"
