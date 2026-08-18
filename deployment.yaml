@@ -1,24 +1,26 @@
 apiVersion: v1
-kind: Namespace
+kind: PersistentVolumeClaim
 metadata:
-  name: notary-prod
-
+  name: notary-api-data-pvc
+  namespace: default
+  labels:
+    app: notary-api
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notary-api
-  namespace: notary-prod
   labels:
     app: notary-api
-    version: v1
+  name: notary-api
+  namespace: default
 spec:
-  replicas: 2
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+  replicas: 1 # Set to 1 to avoid SQLite locking issues across multiple pods
   selector:
     matchLabels:
       app: notary-api
@@ -26,125 +28,71 @@ spec:
     metadata:
       labels:
         app: notary-api
-        version: v1
+        commit-sha: e2a3d71514ee1a78dba7d44bff7454546d433857
     spec:
-      serviceAccountName: notary-api
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
       containers:
-        - image: us-central1-docker.pkg.dev/notary-management-web-platform/cloud-run-source-deploy/notary-management-web-platform/notary-management-web-platform-last:c2ca2bc4fed664a6a1c8698853f6978db99776ac
-          imagePullPolicy: IfNotPresent
-          name: notary-management-web-platform-last-1
-          command: ["uvicorn"]
-          args: ["main:app", "--host", "0.0.0.0", "--port", "8080"]
-          resources:
-          limits:
-            ephemeral-storage: 1Gi
-     spec:
-        containers:
-        - name: notary-management-web-platform-1
-          # Check if this command or args is misconfigured
-          command: ["/app/start.sh"] 
-    
-        ports:
-        - name: http
-          containerPort: 8080
-          protocol: TCP
+      - name: hello
+        image: gcr.io/notary-management-web-platform/github.com/dimurano/notary-management-web-platform:b6268bdd65a20c68ae1a499a6008738fbed6cd43
+        imagePullPolicy: Always
         env:
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: notary-secrets
-              key: database-url
-        - name: ALLOWED_ORIGINS
-          valueFrom:
-            configMapKeyRef:
-              name: notary-config
-              key: allowed-origins
         - name: ENVIRONMENT
-          value: "production"
+          value: production
+        volumeMounts:
+        - name: notary-api-data-volume
+          mountPath: /app/data
         resources:
-          requests:
-            memory: "512Mi"
-            cpu: "250m"
           limits:
-            memory: "1Gi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /api/health
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 30
-          timeoutSeconds: 10
-          failureThreshold: 3
-        readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 2
+            cpu: "1"
+            ephemeral-storage: 1Gi
+            memory: 1280Mi
+          requests:
+            cpu: "1"
+            ephemeral-storage: 1Gi
+            memory: 1280Mi
         securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
           capabilities:
             drop:
-            - ALL
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: app-data
-          mountPath: /app/data
+            - NET_RAW
+        startupProbe:
+          failureThreshold: 24
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 1
+      - name: nginx
+        image: nginx:alpine
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+          requests:
+            cpu: 500m
+            ephemeral-storage: 1Gi
+            memory: 256Mi
+        securityContext:
+          capabilities:
+            drop:
+            - NET_RAW
+      serviceAccountName: notary-api
       volumes:
-      - name: tmp
-        emptyDir: {}
-      - name: app-data
-        emptyDir: {}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: notary-api
-  namespace: notary-prod
-  labels:
-    app: notary-api
-spec:
-  type: ClusterIP
-  ports:
-  - port: 80
-    targetPort: 8080
-    protocol: TCP
-    name: http
-  selector:
-    app: notary-api
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: notary-api
-  namespace: notary-prod
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: notary-config
-  namespace: notary-prod
-data:
-  allowed-origins: "https://notarialsolutions.com,https://www.notarialsolutions.com"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: notary-secrets
-  namespace: notary-prod
-type: Opaque
-stringData:
-  database-url: "postgresql://user:OaklandP69@cloudsql-proxy:5432/notary_db"
+      - name: notary-api-data-volume
+        persistentVolumeClaim:
+          claimName: notary-api-data-pvc
