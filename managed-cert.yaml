@@ -4,4 +4,4 @@ metadata:
   name: notary-ssl-cert
 spec:
   domains:
-    - notarialsolutions.com
+    - app.notarialsolutions.com
