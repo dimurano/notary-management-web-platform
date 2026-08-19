@@ -9,13 +9,13 @@ metadata:
     networking.gke.io/managed-certificates: "notary-api-cert"
 spec:
   rules:
-  # Removing the 'host: app.notarialsolutions.com' line makes this a catch-all rule
-  - http:
+  - host: app.notarialsolutions.com 
+    http:
       paths:
-      - path: /
-        pathType: Prefix
-        backend:
+      - backend:
           service:
             name: notary-api-lb
             port:
               number: 80
+        path: /
+        pathType: Prefix
