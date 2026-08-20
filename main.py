@@ -1,15 +1,17 @@
-# main.py
+python
+import sys
 import logging
 import os
 import uuid
+import aiofiles
+import csv
+
+import models  # application models / ORM
+
 from datetime import datetime
 from typing import List, Optional, Iterator
 from urllib.parse import urlparse
-
-import aiofiles
-import csv
 from io import StringIO
-
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
@@ -19,15 +21,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import NullPool
 
-import models  # application models / ORM
-
 # ---------- Logging ----------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
-
 
 # ---------- Settings (centralized & validated) ----------
 class Settings(BaseSettings):
