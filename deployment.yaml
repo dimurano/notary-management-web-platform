@@ -1,43 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notary-api
-  namespace: default
+  name: notary-app-deployment
+  namespace: notary-prod
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: notary-api
+      app: notary-app
   template:
     metadata:
       labels:
-        app: notary-api
+        app: notary-app
     spec:
-      serviceAccountName: notary-api
       containers:
-      # 1. Your Main Application Container
-      - name: hello
-        image: gcr.io/notary-management-web-platform/github.com/dimurano/notary-management-web-platform:b6268bdd65a20c68ae1a499a6008738fbed6cd43
-        env:
-        - name: ENVIRONMENT
-          value: production
-        # Tell your app to connect to PostgreSQL via the localhost proxy
-        - name: DATABASE_URL
-          value: "postgresql://user:OaklandP69@cloudsql-proxy:5432/notary_db"
-        # ... other existing configurations ...
-
-      # 2. Cloud SQL Auth Proxy Sidecar Container
-      - name: cloud-sql-proxy
-        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
-        args:
-        - "--port=5432"
-        - "notary-management-web-platform:us-central1:notary-db-instance"
-        securityContext:
-          runAsNonRoot: true
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu:    "100m"
-          limits:
-            memory: "256Mi"
-            cpu:    "100m"
+      - name: app-container
+        image: gcr.io/notary-management-web-platform/notary-app:latest
+        ports:
+        - containerPort: 8080
