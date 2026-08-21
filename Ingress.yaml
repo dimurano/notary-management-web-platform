@@ -1,20 +1,22 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: notary-app-ingress
-  namespace: notary-prod
+  name: notary-api-ingress
+  namespace: default
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "8.233.11.245" # Link a reserved static IP
-    networking.gke.io/managed-certificates: "notary-ssl-cert"       # Setup managed Google SSL
+    kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.global-static-ip-name: "notary-api-static-ip"
+    networking.gke.io/managed-certificates: "notary-api-cert"
 spec:
   rules:
-  - host: app.notarialsolutions.com
-    http:
+  # Removing the 'host: app.notarialsolutions.com' line makes this a catch-all rule
+  - http:
       paths:
       - path: /
         pathType: Prefix
         backend:
           service:
-            name: notary-app-service
+            name: notary-api-lb
             port:
               number: 80
+
