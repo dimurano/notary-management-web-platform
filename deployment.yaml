@@ -1,20 +1,92 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: notary-app-deployment
-  namespace: notary-prod
+  name: notary-api
+  namespace: default
+  labels:
+    app: notary-api
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: notary-app
+      app: notary-api
   template:
     metadata:
       labels:
-        app: notary-app
+        app: notary-api
     spec:
+      securityContext:
+        fsGroup: 2000
       containers:
-      - name: app-container
-        image: gcr.io/notary-management-web-platform/notary-app:latest
+      - name: hello
+        image: gcr.io/notary-management-web-platform/github.com/dimurano/notary-management-web-platform:b6268bdd65a20c68ae1a499a6008738fbed6cd43
+        env:
+        - name: ENVIRONMENT
+          value: production
+        # FIX 1: Provide the PostgreSQL connection string pointing to local proxy port 5432
+        - name: DATABASE_URL
+          value: postgresql://<DB_USER>:<DB_PASSWORD>@127.0.0.1:5432/<DB_NAME>
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1280Mi
+          requests:
+            cpu: "1"
+            memory: 1280Mi
+        startupProbe:
+          tcpSocket:
+            port: 8080
+          delaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 24
+        volumeMounts:
+        - name: notary-api-data-volume
+          mountPath: /app/data
+      - name: nginx
+        image: nginx:alpine
         ports:
-        - containerPort: 8080
+        - containerPort: 80
+          name: http
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 500m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+          periodSeconds: 20
+          failureThreshold: 3
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/conf.d
+      
+      # FIX 2: Add the Cloud SQL Auth Proxy sidecar container
+      - name: cloud-sql-proxy
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11.0
+        args:
+        - "--port=5432"
+        - "notary-management-web-platform:us-central1:notary-db-instance"
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+
+      volumes:
+      - name: notary-api-data-volume
+        persistentVolumeClaim:
+          claimName: notary-api-data-pvc
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-config
