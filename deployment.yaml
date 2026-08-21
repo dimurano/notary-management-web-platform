@@ -24,7 +24,7 @@ spec:
         - name: ENVIRONMENT
           value: production
         # FIX 1: Provide the PostgreSQL connection string pointing to local proxy port 5432
-        - name: notary-management-web-platform:us-central1:notary-db-instance
+        - name: DATABASE_URL
           value: postgresql://rfranco:OaklandP69@@127.0.0.1:5432/notary-db-instance
         resources:
           limits:
