@@ -102,9 +102,6 @@ try:
     engine_kwargs["poolclass"] = NullPool
     # Some DB drivers accept connect_args, others don't; keep conservative
     engine_kwargs["connect_args"] = {"connect_timeout": DB_CONNECT_TIMEOUT}
-    else:
-        # SQLite specific
-        engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": DB_CONNECT_TIMEOUT}
 
     engine = create_engine(DATABASE_URL, **engine_kwargs)
     # quick connection test
