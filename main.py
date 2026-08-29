@@ -98,10 +98,10 @@ try:
     scheme = parsed.scheme or ""
 
     if scheme.startswith("postgres") or "postgresql" in DATABASE_URL:"postgresql://user:OaklandP69@cloudsql-proxy:5432/notary_db"
-        # Cloud Run / serverless: do not use connection pooling
-        engine_kwargs["poolclass"] = NullPool
-        # Some DB drivers accept connect_args, others don't; keep conservative
-        engine_kwargs["connect_args"] = {"connect_timeout": DB_CONNECT_TIMEOUT}
+    # Cloud Run / serverless: do not use connection pooling
+    engine_kwargs["poolclass"] = NullPool
+    # Some DB drivers accept connect_args, others don't; keep conservative
+    engine_kwargs["connect_args"] = {"connect_timeout": DB_CONNECT_TIMEOUT}
     else:
         # SQLite specific
         engine_kwargs["connect_args"] = {"check_same_thread": False, "timeout": DB_CONNECT_TIMEOUT}
