@@ -7,7 +7,7 @@ import csv
 
 import models  # application models / ORM
 
-from datetime import datetime
+from datetime import datetime, date, time
 from typing import List, Optional, Iterator
 from urllib.parse import urlparse
 from io import StringIO
@@ -88,34 +88,41 @@ logger.info(f"Allowed origins: {ALLOWED_ORIGINS or ['<none configured>']}")
 engine = None
 SessionLocal = None
 
-try:
-    engine_kwargs = {
-        "echo": False,
-        "pool_pre_ping": True,
-    }
 
-    parsed = urlparse(DATABASE_URL or "")
-    scheme = parsed.scheme or ""
+def init_engine(database_url: Optional[str]):
+    if not database_url:
+        logger.warning("DATABASE_URL not set; database disabled")
+        return None, None
 
-    if scheme.startswith("postgres") or "postgresql" in DATABASE_URL:"postgresql://user:OaklandP69@cloudsql-proxy:5432/notary_db"
-    # Cloud Run / serverless: do not use connection pooling
-    engine_kwargs["poolclass"] = NullPool
+    engine_kwargs = {"echo": False, "pool_pre_ping": True}
+    parsed = urlparse(database_url or "")
+    scheme = (parsed.scheme or "").lower()
+
+    # Cloud Run / serverless: do not use connection pooling for Postgres
+    if scheme.startswith("postgres") or scheme.startswith("postgresql"):
+        engine_kwargs["poolclass"] = NullPool
+
     # Some DB drivers accept connect_args, others don't; keep conservative
-    engine_kwargs["connect_args"] = {"connect_timeout": DB_CONNECT_TIMEOUT}
+    if scheme in ("sqlite", "sqlite3"):
+        engine_kwargs["connect_args"] = {"check_same_thread": False}
+    else:
+        if DB_CONNECT_TIMEOUT:
+            engine_kwargs.setdefault("connect_args", {})["connect_timeout"] = DB_CONNECT_TIMEOUT
 
-    engine = create_engine(DATABASE_URL, **engine_kwargs)
-    # quick connection test
-    with engine.connect() as conn:
-        logger.info("Database connection test successful")
+    try:
+        eng = create_engine(database_url, **engine_kwargs)
+        # quick connection test
+        with eng.connect() as conn:
+            logger.info("Database connection test successful")
+        SessionFactory = sessionmaker(autocommit=False, autoflush=False, bind=eng)
+        logger.info("Database session factory created")
+        return eng, SessionFactory
+    except Exception:
+        logger.exception("Database initialization error")
+        return None, None
 
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    logger.info("Database session factory created")
 
-except Exception as e:
-    logger.error(f"Database initialization error: {e}")
-    logger.warning("App will start but database operations will fail until database is available")
-    engine = None
-    SessionLocal = None
+engine, SessionLocal = init_engine(DATABASE_URL)
 
 
 # ---------- FastAPI app ----------
@@ -144,19 +151,20 @@ def get_db() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db
-    except Exception as e:
-        logger.error(f"Database session error: {e}")
+        db.commit()
+    except Exception:
         db.rollback()
+        logger.exception("Database session error; rolled back")
         raise
     finally:
         db.close()
 
 
 # ---------- Utility: CSV streaming generator ----------
-def csv_row_generator(rows: List[models.NotarialSession]) -> Iterator[str]:
+def csv_row_generator(rows: Iterator[models.NotarialSession]) -> Iterator[str]:
     """
     Yield CSV data in chunks to avoid holding large files in memory.
-    Accepts a list of sessions (already fetched). We create rows for each act.
+    Accepts an iterable/query that yields NotarialSession instances lazily.
     """
     buffer = StringIO()
     writer = csv.writer(buffer)
@@ -181,54 +189,87 @@ def csv_row_generator(rows: List[models.NotarialSession]) -> Iterator[str]:
     buffer.truncate(0)
 
     for s in rows:
-        signers = ", ".join([f"{c.first_name} {c.last_name}" for c in getattr(s, "clients", [])])
-        for act in getattr(s, "acts", []):
-            writer.writerow(
-                [
-                    s.session_date.strftime("%Y-%m-%d %H:%M:%S") if getattr(s, "session_date", None) else "",
-                    signers,
+        try:
+            signers = []
+            for c in getattr(s, "clients", []) or []:
+                first = getattr(c, "first_name", "") or ""
+                last = getattr(c, "last_name", "") or ""
+                name = (first + " " + last).strip()
+                if name:
+                    signers.append(name)
+            signer_str = ", ".join(signers)
+
+            session_date = getattr(s, "session_date", None)
+            date_str = session_date.strftime("%Y-%m-%d %H:%M:%S") if session_date else ""
+
+            acts = getattr(s, "acts", []) or [None]
+            for act in acts:
+                if act is None:
+                    document_title = ""
+                    act_type = ""
+                    statutory_fee = ""
+                    additional_fee = ""
+                else:
+                    doc = getattr(act, "document", None)
+                    document_title = getattr(doc, "document_title", "") if doc is not None else ""
+                    act_type_attr = getattr(act, "act_type", None)
+                    act_type = getattr(act_type_attr, "value", str(act_type_attr)) if act_type_attr is not None else ""
+                    statutory_fee = str(getattr(act, "statutory_fee", ""))
+                    additional_fee = str(getattr(act, "additional_fee", ""))
+
+                row = [
+                    date_str,
+                    signer_str,
                     getattr(s, "location_type", "") or "",
-                    getattr(s, "ron_platform", "") or "N/A (In-Person)",
-                    getattr(act, "document", None).document_title if getattr(act, "document", None) else "",
-                    getattr(act, "act_type").value if getattr(act, "act_type", None) else "",
-                    float(getattr(act, "statutory_fee", 0.0) or 0.0),
-                    float(getattr(act, "additional_fee", 0.0) or 0.0),
-                    getattr(s, "payment_status").value if getattr(s, "payment_status", None) else "",
-                    getattr(s, "tamper_evident_seal_id", "") or "N/A",
+                    getattr(s, "ron_platform", "") or "",
+                    document_title,
+                    act_type,
+                    statutory_fee,
+                    additional_fee,
+                    getattr(s, "payment_status", "") and getattr(getattr(s, "payment_status", None), "value", str(getattr(s, "payment_status", ""))) or "",
+                    getattr(s, "tamper_evident_seal_id", "") or "",
                 ]
-            )
-            yield buffer.getvalue()
-            buffer.seek(0)
-            buffer.truncate(0)
+
+                writer.writerow(row)
+                yield buffer.getvalue()
+                buffer.seek(0)
+                buffer.truncate(0)
+        except Exception:
+            logger.exception("Error while rendering a CSV row for session id=%s", getattr(s, "session_id", "<unknown>"))
+            continue
 
 
 # ---------- Endpoints ----------
 @app.get("/api/journal/export")
 def export_state_audit_ledger(
-    start_date: Optional[str] = Query(None, description="Format: YYYY-MM-DD"),
-    end_date: Optional[str] = Query(None, description="Format: YYYY-MM-DD"),
+    start_date: Optional[date] = Query(None, description="Format: YYYY-MM-DD"),
+    end_date: Optional[date] = Query(None, description="Format: YYYY-MM-DD"),
     db: Session = Depends(get_db),
 ):
     """
     Export notarial sessions to CSV. Streams the CSV so large datasets don't consume memory.
     """
-    query = db.query(models.NotarialSession)
-
     try:
+        query = db.query(models.NotarialSession)
+
         if start_date:
-            query = query.filter(models.NotarialSession.session_date >= datetime.strptime(start_date, "%Y-%m-%d"))
+            query = query.filter(models.NotarialSession.session_date >= datetime.combine(start_date, time.min))
         if end_date:
-            query = query.filter(models.NotarialSession.session_date <= datetime.strptime(end_date, "%Y-%m-%d"))
-    except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid date format; use YYYY-MM-DD")
+            query = query.filter(models.NotarialSession.session_date <= datetime.combine(end_date, time.max))
 
-    sessions = query.order_by(models.NotarialSession.session_date.asc()).all()
+        # Use yield_per to avoid loading entire resultset into memory
+        query = query.order_by(models.NotarialSession.session_date.asc()).yield_per(200).enable_eagerloads(False)
 
-    filename = f"notarial_journal_export_{datetime.now().strftime('%Y%m%d')}.csv"
-    generator = csv_row_generator(sessions)
-    response = StreamingResponse(generator, media_type="text/csv")
-    response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
-    return response
+        filename = f"notarial_journal_export_{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}.csv"
+        generator = csv_row_generator(query)
+        response = StreamingResponse(generator, media_type="text/csv")
+        response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Failed to generate journal export")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate export")
 
 
 @app.post("/api/documents/upload")
@@ -249,19 +290,36 @@ async def upload_notarial_document(file: UploadFile = File(...)):
                 if not chunk:
                     break
                 await out_file.write(chunk)
-    except Exception as e:
-        logger.error(f"Error saving uploaded file: {e}")
+    except Exception:
+        logger.exception("Error saving uploaded file")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save file")
 
     return {"file_path_hash": secure_hash_name, "original_name": file.filename}
 
 
+# Validate file identifiers (allow alnum, dash, underscore, dot; reasonable length)
+FILE_HASH_RE = re.compile(r"^[A-Za-z0-9_-]{16,64}(?:\.[A-Za-z0-9]+)?$")
+
+
 @app.get("/api/documents/view/{file_hash}")
 def get_document_preview(file_hash: str):
-    file_path = os.path.join(UPLOAD_DIR, file_hash)
+    # Validate format
+    if not FILE_HASH_RE.match(file_hash):
+        logger.warning("Invalid file identifier requested: %s", file_hash)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file identifier")
+
+    upload_dir_abs = os.path.abspath(UPLOAD_DIR)
+    file_path = os.path.abspath(os.path.join(upload_dir_abs, file_hash))
+
+    # Ensure the resolved path is inside the upload directory
+    if not file_path.startswith(upload_dir_abs + os.sep) and file_path != upload_dir_abs:
+        logger.warning("Attempted path traversal or invalid file path: %s", file_path)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file path")
+
     if not os.path.exists(file_path):
+        logger.info("File not found: %s", file_path)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    # Let the server or reverse proxy determine content-type if unknown.
+
     return FileResponse(file_path)
 
 
@@ -276,9 +334,8 @@ def startup():
         logger.info("Creating database tables...")
         models.Base.metadata.create_all(bind=engine)
         logger.info("Database tables created successfully")
-    except Exception as e:
-        logger.error(f"Error creating database tables: {e}")
-        # Do not raise here to allow health endpoints to remain available
+    except Exception:
+        logger.exception("Error creating database tables on startup")
 
 
 @app.on_event("shutdown")
@@ -288,8 +345,8 @@ def shutdown():
         if engine:
             engine.dispose()
             logger.info("Database connections closed")
-    except Exception as e:
-        logger.error(f"Error during shutdown: {e}")
+    except Exception:
+        logger.exception("Error during shutdown")
 
 
 # ---------- Schemas ----------
@@ -316,7 +373,7 @@ class DocumentCreate(BaseModel):
 
 class ActCreate(BaseModel):
     document: DocumentCreate
-    act_type: models.ActType
+    act_type: str  # decoupled from ORM enum for API layer
     statutory_fee: float = 0.0
     additional_fee: float = 0.0
     notes: Optional[str] = None
@@ -328,8 +385,8 @@ class SessionCreate(BaseModel):
     location_type: str
     meeting_address: Optional[str] = None
     notes: Optional[str] = None
-    payment_status: models.PaymentStatus = models.PaymentStatus.unpaid
-    payment_method: Optional[models.PaymentMethod] = None
+    payment_status: Optional[str] = "unpaid"
+    payment_method: Optional[str] = None
     acts: List[ActCreate]
 
 
@@ -338,7 +395,7 @@ class SessionResponse(BaseModel):
     date: datetime
     location_type: str
     total_fee: float
-    payment_status: models.PaymentStatus
+    payment_status: Optional[str]
     clients: List[dict]
     acts_count: int
 
@@ -384,9 +441,9 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
         return db_client
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        logger.error(f"Error creating client: {e}")
+        logger.exception("Error creating client")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create client.")
 
 
@@ -397,8 +454,8 @@ def get_clients(db: Session = Depends(get_db)):
         clients = db.query(models.Client).all()
         logger.info(f"Retrieved {len(clients)} clients")
         return clients
-    except Exception as e:
-        logger.error(f"Error fetching clients: {e}")
+    except Exception:
+        logger.exception("Error fetching clients")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve clients.")
 
 
@@ -462,9 +519,9 @@ def create_notarial_session(session_data: SessionCreate, db: Session = Depends(g
         return {"message": "Session and journal entry recorded successfully", "session_id": db_session.session_id}
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        logger.error(f"Error creating session: {e}")
+        logger.exception("Error creating session")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create notarial session.")
 
 
@@ -482,7 +539,7 @@ def get_journal_ledger(db: Session = Depends(get_db)):
                     "date": s.session_date,
                     "location_type": s.location_type,
                     "total_fee": float(s.total_fee),
-                    "payment_status": s.payment_status,
+                    "payment_status": getattr(s, 'payment_status', None) and getattr(getattr(s, 'payment_status', None), 'value', str(getattr(s, 'payment_status', None))) or None,
                     "clients": [{"id": c.client_id, "name": f"{c.first_name} {c.last_name}"} for c in getattr(s, "clients", [])],
                     "acts_count": len(getattr(s, "acts", [])),
                 }
@@ -490,6 +547,6 @@ def get_journal_ledger(db: Session = Depends(get_db)):
 
         logger.info(f"Retrieved {len(sessions)} sessions")
         return output
-    except Exception as e:
-        logger.error(f"Error fetching sessions: {e}")
+    except Exception:
+        logger.exception("Error fetching sessions")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to retrieve sessions.")
