@@ -20,6 +20,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import NullPool
 
+# Extract directory from database path or hardcode it
+db_dir = "./data" 
+if not os.path.exists(db_dir):
+    os.makedirs(db_dir, exist_ok=True)
+
 # ---------- Logging ----------
 logging.basicConfig(
     level=logging.INFO,
