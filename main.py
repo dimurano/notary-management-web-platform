@@ -29,7 +29,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ---------- Settings (centralized & validated) ----------
+# ---------- Settings (centralized & validated - Pydantic v2 Style) ----------
 class Settings(BaseSettings):
     database_url: str = "sqlite:///./data/notary_journal.db"
     allowed_origins: Optional[str] = "http://localhost:3000"
@@ -37,11 +37,15 @@ class Settings(BaseSettings):
     upload_dir: str = "./secure_vault"
     db_connect_timeout: int = 1
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # 1. Replaced 'class Config' with the modern 'model_config' dictionary
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8"
+    )
 
-    @validator("allowed_origins", pre=True)
+    # 2. Replaced '@validator(..., pre=True)' with '@field_validator(..., mode="before")'
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
     def split_allowed_origins(cls, v: Optional[str]) -> str:
         if v is None:
             return ""
@@ -49,9 +53,7 @@ class Settings(BaseSettings):
             return ",".join(v)
         return v
 
-
 settings = Settings()
-
 
 def mask_database_url(url: Optional[str]) -> str:
     if not url:
@@ -71,14 +73,13 @@ def mask_database_url(url: Optional[str]) -> str:
     except Exception:
         return "malformed"
 
-
 DATABASE_URL = settings.database_url
 ALLOWED_ORIGINS = [o.strip() for o in (settings.allowed_origins or "").split(",") if o.strip()]
 ENVIRONMENT = settings.environment
 UPLOAD_DIR = settings.upload_dir
 DB_CONNECT_TIMEOUT = settings.db_connect_timeout
 
-# Move initialization variables to a global scope so endpoints can access them
+# ----------Move initialization variables to a global scope so endpoints can access them----------
 engine = None
 SessionLocal = None
 
@@ -152,7 +153,7 @@ app = FastAPI(
     lifespan=lifespan  # Attach your lifespan definition here
 )
 
-# CORS middleware
+# ----------CORS middleware----------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS or [],
@@ -182,6 +183,7 @@ def get_db() -> Iterator[Session]:
 
 
 # ---------- Utility: CSV streaming generator ----------
+
 def csv_row_generator(rows: Iterator[models.NotarialSession]) -> Iterator[str]:
     """
     Yield CSV data in chunks to avoid holding large files in memory.
