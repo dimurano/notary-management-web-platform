@@ -16,8 +16,8 @@ from contextlib import asynccontextmanager  # Required for modern lifespan handl
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
-     @app.get("/")
-     async def read_root(): 
+@app.get("/")
+async def read_root(): 
      return FileResponse("index.html") 
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, validator
