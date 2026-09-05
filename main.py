@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 @app.get("/")
 async def read_root(): 
-     return FileResponse("index.html") 
+return FileResponse("index.html") 
 
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, validator
 from pydantic_settings import BaseSettings
