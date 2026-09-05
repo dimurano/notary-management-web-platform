@@ -6,6 +6,13 @@ import uuid
 import aiofiles
 import csv
 
+import uvicorn
+
+if __name__ == "__main__":
+    # Read the PORT env variable provided by Cloud Run, fallback to 8000 locally
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
+
 import models  # application models / ORM
 
 from datetime import datetime, date, time
