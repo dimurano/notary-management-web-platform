@@ -16,6 +16,10 @@ from contextlib import asynccontextmanager  # Required for modern lifespan handl
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
+     @app.get("/")
+     async def read_root(): 
+     return FileResponse("index.html") 
+
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator, validator
 from pydantic_settings import BaseSettings
 from sqlalchemy import create_engine
@@ -151,6 +155,8 @@ app = FastAPI(
     title="Notary Public Journal API", 
     version="1.0.0",
     lifespan=lifespan  # Attach your lifespan definition here
+
+    
 )
 
 # ----------CORS middleware----------
