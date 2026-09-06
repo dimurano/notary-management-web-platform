@@ -1,4 +1,4 @@
-\f1\fs28 \cf0 async function submitNotarialSession() \{\
+    async function submitNotarialSession() \{\
     // 1. Gather core session and RON metadata\
     const sessionPayload = \{\
         notary_id: "777e4321-e89b-12d3-a456-426614174000", // Hardcoded or pulled from user session profile\
