@@ -16,7 +16,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: notary-api-lb
+            name: deployment-6-service
             port:
               number: 80
 
