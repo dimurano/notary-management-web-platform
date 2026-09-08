@@ -1,0 +1,21 @@
+spec:
+  template:
+    spec:
+      containers:
+      - name: notary-management-web-platform-sha256-1
+        command:
+        - uvicorn
+        - main:app
+        - --host
+        - 0.0.0.0
+        - --port
+        - "8080"
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        # Add your database environment variables if needed
+        # - name: DATABASE_URL
+        #   value: "postgresql://..."
