@@ -1,0 +1,144 @@
+/* =====================================================
+   NotaryFlow Stylesheet
+   Custom styles for improved maintainability
+   ===================================================== */
+
+/* Navigation Active State */
+.nav-btn.active {
+    background-color: #4f46e5;
+    color: white;
+}
+
+.nav-btn {
+    transition: all 0.3s ease;
+}
+
+.nav-btn:focus {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+}
+
+/* Form Error & Success Messages */
+#clientFormMessage,
+#sessionFormMessage {
+    animation: slideDown 0.3s ease-out;
+}
+
+#clientFormMessage.success,
+#sessionFormMessage.success {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+#clientFormMessage.error,
+#sessionFormMessage.error {
+    background-color: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Table Row Hover State */
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: rgba(226, 232, 240, 0.5);
+}
+
+/* Compliance Alert Animation */
+#compliance-alert {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Loading State */
+.loading-skeleton {
+    background: linear-gradient(
+        90deg,
+        #e5e7eb 25%,
+        #f3f4f6 50%,
+        #e5e7eb 75%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Button States */
+button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+button[type="submit"]:active {
+    transform: scale(0.98);
+}
+
+/* File Input Styling */
+input[type="file"]::-webkit-file-upload-button {
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+    cursor: pointer;
+}
+
+/* Accessibility: Focus Visible */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+    aside,
+    button {
+        display: none;
+    }
+    
+    main {
+        padding: 0;
+    }
+    
+    .view-panel {
+        page-break-after: always;
+    }
+}
+
+/* Responsive Text */
+@media (max-width: 768px) {
+    aside {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        height: auto;
+        min-height: 60px;
+    }
+    
+    main {
+        padding: 1rem;
+    }
+}
