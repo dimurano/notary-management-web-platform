@@ -206,7 +206,7 @@ def csv_row_generator(rows: Iterator[models.NotarialSession]) -> Iterator[str]:
 @app.get("/") 
 async def read_root(): 
     # Make sure index.html is copied to your root path inside the Docker image!
-    return FileResponse("index.html") 
+    return FileResponse("/home/rfranco/notary-management-web-platform/index.html") 
 
 # ---------- Execution Block (Must be at the bottom) ---------- 
 if __name__ == "__main__": 
