@@ -208,6 +208,17 @@ async def read_root():
     # Make sure index.html is copied to your root path inside the Docker image!
     return FileResponse("/home/rfranco/notary-management-web-platform/index.html") 
 
+@app.get("/download-document")
+async def download_document(file_id: str):
+    # 1. Resolve your absolute path safely
+    file_path = f"/var/data/notary_docs/{file_id}.pdf"
+    
+    # 2. Check existence BEFORE triggering FileResponse
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Requested notary document not found.")
+        
+    return FileResponse(file_path
+
 # ---------- Execution Block (Must be at the bottom) ---------- 
 if __name__ == "__main__": 
     # Read the PORT env variable provided by Cloud Run, fallback to 8000 locally 
