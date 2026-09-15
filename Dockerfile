@@ -9,6 +9,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Set the working directory inside the container
 WORKDIR /app
+COPY index.html /app/index.html
 
 # Install system dependencies if required (Optional: omit if your app only needs pip packages)
 # RUN apt-get update && apt-get install -y --no-install-recommends \
