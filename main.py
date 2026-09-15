@@ -203,6 +203,15 @@ def csv_row_generator(rows: Iterator[models.NotarialSession]) -> Iterator[str]:
             raise 
 
 # ---------- Endpoints ---------- 
+# Determine the directory where main.py resides
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+@app.get("/")
+async def read_index():
+    # Use a relative path package-safe lookup
+    index_path = os.path.join(BASE_DIR, "index.html")
+    return FileResponse(index_path)
+
 @app.get("/") 
 async def read_root(): 
     # Make sure index.html is copied to your root path inside the Docker image!
